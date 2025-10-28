@@ -5,7 +5,8 @@ using TaleWorlds.SaveSystem;
 using TaleWorlds.CampaignSystem;
 using WarCouncilModern.Models;
 
-namespace WarCouncilModern.CouncilSystem
+namespace WarCouncilModern.Models.Entities
+
 {
     public class WarCouncil
     {

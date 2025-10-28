@@ -1,7 +1,8 @@
 ﻿using System;
 using TaleWorlds.SaveSystem;
 
-namespace WarCouncilModern.CouncilSystem
+namespace WarCouncilModern.Models.Entities
+
 {
     public class WarDecision
     {

@@ -90,7 +90,17 @@
   </ItemGroup>
   <ItemGroup>
     <!-- ملفات الكود -->
-    <Compile Include="WarCouncilModern\Core\Utilities\FeatureRegistry.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\IAdvisorService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\ICouncilMeetingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\IDecisionProcessingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubAdvisorService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubCouncilMeetingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubDecisionProcessingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Settings\IModSettings.cs" />
+    <Compile Include="WarCouncilModern\Core\Settings\StubModSettings.cs" />
+    <Compile Include="WarCouncilModern\Core\State\IModStateTracker.cs" />
+    <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Interfaces\IFeatureRegistry.cs" />
     <Compile Include="WarCouncilModern\Core\Init\ModuleInitializer.cs" />
     <Compile Include="WarCouncilModern\Core\Init\StartupGuards.cs" />
     <Compile Include="WarCouncilModern\Core\Manager\BehaviorRegistry.cs" />
@@ -111,7 +121,11 @@
     <Compile Include="WarCouncilModern\CouncilSystem\Strategies\WarPlanStrategy.cs" />
     <Compile Include="WarCouncilModern\Initialization\InitHelpers.cs" />
     <Compile Include="WarCouncilModern\Core\Settings\ModSettings.cs" />
+    <Compile Include="WarCouncilModern\Models\Persistence\CouncilPersistenceAdapter.cs" />
+    <Compile Include="WarCouncilModern\Models\Persistence\IPersistenceAdapter.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Interfaces\IModLogger.cs" />
     <Compile Include="WarCouncilModern\Utilities\Logging\ModLogger.cs" />
+    <Compile Include="WarCouncilModern\Utilities\ModLogger.cs" />
     <Compile Include="WarCouncilModern\Utilities\Reflection\ReflectionHelpers.cs" />
     <Compile Include="WarCouncilModern\Initialization\SubModule.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\WarCouncilTestBehavior.cs" />
@@ -144,7 +158,7 @@
     <None Include="WarCouncilModern\docs\README_DEV_NOTES.md" />
     <None Include="WarCouncilModern\docs\TEAM_GUIDE.md" />
     <None Include="WarCouncilModern\docs\TEST_PLAN.md" />
-    <None Include="WarCouncilModern\ModuleData.xml" />
+    <None Include="WarCouncilModern\Core\Init\ModuleData.xml" />
     <None Include="WarCouncilModern\Script\DeployDebugLog.ps1" />
     <None Include="WarCouncilModern\Script\PostBuildCopy.ps1" />
     <None Include="WarCouncilModern\tools\CheckBuild.ps1" />
@@ -152,6 +166,7 @@
     <None Include="WarCouncilModern\tools\PostBuildCopy.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="WarCouncilModern\Core\Utilities\" />
     <Folder Include="WarCouncilModern\examples\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

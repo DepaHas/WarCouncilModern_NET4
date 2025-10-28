@@ -1,199 +1,356 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TaleWorlds.SaveSystem;
-using TaleWorlds.CampaignSystem;
+using System.Threading.Tasks;
+using WarCouncilModern.Core.Services;
+using WarCouncilModern.Core.Settings;
+using WarCouncilModern.Core.State;
+using WarCouncilModern.CouncilSystem;
 using WarCouncilModern.Models;
+using WarCouncilModern.Models.Entities;
+using WarCouncilModern.Models.Persistence;
+using WarCouncilModern.Utilities;
+using WarCouncilModern.Utilities.Interfaces;
 
-namespace WarCouncilModern.CouncilSystem
+namespace WarCouncilModern.Core.Manager
 {
     /// <summary>
-    /// مدير المجالس؛ يخزن خريطة KingdomStringId -> WarCouncil ويُحفظ عبر SaveSystem.
-    /// يتضمن خاصية Instance للوصول العالمي الآمن وإجراءات مساعدة للتهيئة وإدارة التقارير.
+    /// واجهة مدير المجالس لتسهيل الاختبار والحقن
     /// </summary>
-    public class WarCouncilManager
+    public interface IWarCouncilManager
     {
-        // Singleton عام لتسهيل الوصول من السلوكيات وقطع الواجهة الأخرى.
-        // يمكن إعادة تعيينه عند SyncData بعد التحميل.
-        public static WarCouncilManager Instance { get; set; }
+        IReadOnlyList<WarCouncil> Councils { get; }
+        WarCouncil CreateCouncil(string name, string factionId, string location = "");
+        WarCouncil? GetCouncilById(Guid saveId);
+        WarCouncil? GetCouncilByFaction(string factionId);
+        bool RemoveCouncil(Guid saveId);
+        bool AddMemberToCouncil(Guid councilId, WarHero hero);
+        bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId);
+        WarDecision? ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
+        Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
+        event Action<WarCouncil, WarDecision>? DecisionProposed;
+        event Action<WarCouncil>? CouncilCreated;
+        event Action<WarCouncil>? CouncilRemoved;
+    }
 
-        [SaveableField(1)] private Dictionary<string, WarCouncil> _allCouncils;
+    /// <summary>
+    /// مدير المجالس: نقطة التنسيق بين النماذج والخدمات.
+    /// يتعامل مع state tracking, feature flags, persistence adapter, و logging.
+    /// </summary>
+    public class WarCouncilManager : IWarCouncilManager
+    {
+        private readonly List<WarCouncil> _councils = new();
+        private readonly object _locker = new();
 
-        private readonly object _lock = new object();
+        private readonly ICouncilMeetingService _meetingService;
+        private readonly IDecisionProcessingService _decisionService;
+        private readonly IAdvisorService _advisorService;
+        private readonly IModSettings _settings;
+        private readonly IModLogger _logger;
+        private readonly IPersistenceAdapter _persistence;
+        private readonly IModStateTracker _stateTracker;
+        private readonly IFeatureRegistry _featureRegistry;
 
-        public WarCouncilManager()
+        public IReadOnlyList<WarCouncil> Councils
         {
-            _allCouncils = new Dictionary<string, WarCouncil>(StringComparer.Ordinal);
-        }
-
-        public IReadOnlyDictionary<string, WarCouncil> AllCouncils
-        {
-            get { lock (_lock) { return new Dictionary<string, WarCouncil>(_allCouncils); } }
-        }
-
-        public bool TryGetCouncil(string kingdomId, out WarCouncil council)
-        {
-            council = null;
-            if (string.IsNullOrEmpty(kingdomId)) return false;
-            lock (_lock) return _allCouncils.TryGetValue(kingdomId, out council);
-        }
-
-        public WarCouncil GetOrCreateCouncil(string kingdomId)
-        {
-            if (string.IsNullOrEmpty(kingdomId)) throw new ArgumentNullException(nameof(kingdomId));
-            lock (_lock)
+            get
             {
-                if (!_allCouncils.TryGetValue(kingdomId, out var c))
+                lock (_locker) return _councils.ToList().AsReadOnly();
+            }
+        }
+
+        public event Action<WarCouncil, WarDecision>? DecisionProposed;
+        public event Action<WarCouncil>? CouncilCreated;
+        public event Action<WarCouncil>? CouncilRemoved;
+
+        /// <summary>
+        /// Constructor with required dependencies injected.
+        /// </summary>
+        public WarCouncilManager(
+            ICouncilMeetingService meetingService,
+            IDecisionProcessingService decisionService,
+            IAdvisorService advisorService,
+            IModSettings settings,
+            IModLogger logger,
+            IPersistenceAdapter persistence,
+            IModStateTracker stateTracker,
+            IFeatureRegistry featureRegistry)
+        {
+            _meetingService = meetingService ?? throw new ArgumentNullException(nameof(meetingService));
+            _decision_service = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
+            _advisor_service = advisorService ?? throw new ArgumentNullException(nameof(advisorService));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
+            _stateTracker = stateTracker ?? throw new ArgumentNullException(nameof(stateTracker));
+            _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
+        }
+
+        #region Council lifecycle
+
+        /// <summary>
+        /// Creates a new War Council for the specified faction.
+        /// </summary>
+        public WarCouncil CreateCouncil(string name, string factionId, string location = "")
+        {
+            if (string.IsNullOrWhiteSpace(factionId)) throw new ArgumentException("factionId is required", nameof(factionId));
+
+            var council = new WarCouncil(name ?? "Council", factionId, location ?? string.Empty);
+            lock (_locker) _councils.Add(council);
+
+            _logger.Info($"[WarCouncilManager] Created council '{council.Name}' for faction '{factionId}' ({council.SaveId}).");
+            _stateTracker.RecordEvent("CouncilCreated", council.SaveId, new { council.Name, council.FactionId });
+
+            SafeInvoke(() =>
+            {
+                try { _advisorService.InitializeForCouncil(council); }
+                catch (Exception ex) { _logger.Warn($"Advisor initialization failed: {ex.Message}"); }
+            });
+
+            CouncilCreated?.Invoke(council);
+            return council;
+        }
+
+        /// <summary>
+        /// Returns council by SaveId or null.
+        /// </summary>
+        public WarCouncil? GetCouncilById(Guid saveId)
+        {
+            lock (_locker) return _councils.FirstOrDefault(c => c.SaveId == saveId);
+        }
+
+        /// <summary>
+        /// Returns the first council matching the factionId or null.
+        /// </summary>
+        public WarCouncil? GetCouncilByFaction(string factionId)
+        {
+            if (string.IsNullOrWhiteSpace(factionId)) return null;
+            lock (_locker) return _councils.FirstOrDefault(c => c.FactionId == factionId);
+        }
+
+        /// <summary>
+        /// Removes council by SaveId.
+        /// </summary>
+        public bool RemoveCouncil(Guid saveId)
+        {
+            WarCouncil? removed = null;
+            lock (_locker)
+            {
+                var c = _councils.FirstOrDefault(x => x.SaveId == saveId);
+                if (c == null) return false;
+                _councils.Remove(c);
+                removed = c;
+            }
+
+            if (removed != null)
+            {
+                _logger.Info($"[WarCouncilManager] Removed council '{removed.Name}' ({saveId}).");
+                _stateTracker.RecordEvent("CouncilRemoved", removed.SaveId, new { removed.Name, removed.FactionId });
+                CouncilRemoved?.Invoke(removed);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Clears all councils (use carefully).
+        /// </summary>
+        public void ClearAll()
+        {
+            lock (_locker) _councils.Clear();
+            _logger.Info("[WarCouncilManager] Cleared all councils.");
+            _stateTracker.RecordEvent("AllCouncilsCleared", Guid.Empty, null);
+        }
+
+        #endregion
+
+        #region Members management
+
+        /// <summary>
+        /// Adds a member to the specified council.
+        /// </summary>
+        public bool AddMemberToCouncil(Guid councilId, WarHero hero)
+        {
+            var c = GetCouncilById(councilId);
+            if (c == null)
+            {
+                _logger.Warn($"AddMember failed: Council {councilId} not found.");
+                return false;
+            }
+
+            var added = false;
+            try
+            {
+                added = c.AddMember(hero);
+                if (added)
                 {
-                    c = new WarCouncil(kingdomId, CouncilStructure.RoyalAppointed);
-                    _allCouncils[kingdomId] = c;
+                    _logger.Debug($"Added member '{hero.Name}' to council '{c.Name}'.");
+                    _stateTracker.RecordEvent("MemberAdded", c.SaveId, new { hero.SaveId, hero.Name });
                 }
-                return c;
             }
-        }
+            catch (Exception ex)
+            {
+                _logger.Error($"AddMemberToCouncil error: {ex}", ex);
+            }
 
-        public bool RemoveCouncil(string kingdomId)
-        {
-            if (string.IsNullOrEmpty(kingdomId)) return false;
-            lock (_lock) return _allCouncils.Remove(kingdomId);
+            return added;
         }
 
         /// <summary>
-        /// يملأ المجالس الأساسية اعتمادًا على Kingdoms المتاحة في الحملة.
-        /// يجب استدعاءه بعد أن تكون بيانات الحملة جاهزة (بعد تحميل اللعبة).
+        /// Removes a member from the specified council.
         /// </summary>
-        public void InitializeDataFromKingdoms()
+        public bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId)
         {
-            lock (_lock)
-            {
-                _allCouncils.Clear();
+            var c = GetCouncilById(councilId);
+            if (c == null) return false;
 
-                foreach (var kingdom in Kingdom.All)
+            var removed = c.RemoveMember(heroSaveId);
+            if (removed) _stateTracker.RecordEvent("MemberRemoved", c.SaveId, new { heroSaveId });
+            return removed;
+        }
+
+        #endregion
+
+        #region Decisions
+
+        /// <summary>
+        /// Proposes a new decision in the specified council.
+        /// </summary>
+        public WarDecision? ProposeDecision(Guid councilId, string title, string description, Guid proposedBy)
+        {
+            var c = GetCouncilById(councilId);
+            if (c == null)
+            {
+                _logger.Warn($"ProposeDecision failed: Council {councilId} not found.");
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                _logger.Warn("ProposeDecision failed: title empty.");
+                return null;
+            }
+
+            var decision = c.CreateDecision(title, description, proposedBy);
+            _logger.Info($"Decision proposed in '{c.Name}': {title} ({decision.SaveId}).");
+            _stateTracker.RecordEvent("DecisionProposed", decision.SaveId, new { c.SaveId, title });
+
+            SafeInvoke(() =>
+            {
+                try { _advisorService.OnDecisionProposed(c, decision); }
+                catch (Exception ex) { _logger.Warn($"AdvisorService.OnDecisionProposed threw: {ex.Message}"); }
+            });
+
+            try
+            {
+                var autoSchedule = _featureRegistry.IsEnabled("AutoScheduleMeetingOnProposal");
+                if (autoSchedule)
                 {
-                    if (kingdom == null) continue;
-                    var kId = kingdom.StringId;
-                    if (string.IsNullOrEmpty(kId)) continue;
-                    if (_allCouncils.ContainsKey(kId)) continue;
-
-                    var council = new WarCouncil(kId, CouncilStructure.RoyalAppointed);
-
-                    try
-                    {
-                        var candidates = new List<string>();
-
-                        // محاولة استخدام kingdom.Heroes إن كانت متاحة
-                        var kingdomHeroes = kingdom.Heroes;
-                        if (kingdomHeroes != null)
-                        {
-                            foreach (var h in kingdomHeroes)
-                            {
-                                if (h == null) continue;
-                                if (h.IsLord) candidates.Add(h.StringId ?? string.Empty);
-                            }
-                        }
-
-                        // كاحتياط، نبحث عبر عشائر المملكة
-                        if (candidates.Count == 0)
-                        {
-                            foreach (var clan in Clan.All)
-                            {
-                                if (clan == null) continue;
-                                foreach (var h in clan.Heroes ?? Enumerable.Empty<Hero>())
-                                {
-                                    if (h == null) continue;
-                                    if (h.IsLord && h.Clan?.Kingdom?.StringId == kId)
-                                        candidates.Add(h.StringId ?? string.Empty);
-                                }
-                            }
-                        }
-
-                        council.AssignMembersByHeroIds(candidates);
-                        if (candidates.Count > 0) council.AssignLeaderByHeroId(candidates[0]);
-                    }
-                    catch
-                    {
-                        // تجاهل مشاكل الوصول إلى API واستمر بإنشاء المجلس
-                    }
-
-                    _allCouncils[kId] = council;
+                    _meetingService.ScheduleMeetingForDecision(c, decision);
+                    _logger.Debug("Meeting scheduled automatically for proposed decision.");
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn($"Meeting scheduling failed: {ex.Message}");
+            }
+
+            DecisionProposed?.Invoke(c, decision);
+
+            var autoProcess = _feature_registry.IsEnabled("AutoDecisionProcessing");
+            if (autoProcess)
+            {
+                // run async fire-and-forget but capture errors
+                _ = ProcessDecisionAsync(c.SaveId, decision.SaveId);
+            }
+
+            return decision;
+        }
+
+        /// <summary>
+        /// Processes a decision asynchronously using the decision service.
+        /// </summary>
+        public async Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
+        {
+            var c = GetCouncilById(councilId);
+            if (c == null) return false;
+
+            var d = c.GetDecision(decisionId);
+            if (d == null) return false;
+
+            try
+            {
+                _logger.Info($"Processing decision {d.SaveId} for council {c.Name}.");
+                var result = await _decisionService.ProcessDecisionAsync(c, d).ConfigureAwait(false);
+
+                d.Status = result ? "Executed" : "Failed";
+                _logger.Info($"Decision {d.SaveId} processing result: {d.Status}.");
+                _stateTracker.RecordEvent("DecisionProcessed", d.SaveId, new { c.SaveId, d.Status });
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Decision processing error: {ex}", ex);
+                d.Status = "Error";
+                _stateTracker.RecordEvent("DecisionProcessError", d.SaveId, new { ex.Message });
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Persistence helpers
+
+        /// <summary>
+        /// Exports all councils via the persistence adapter.
+        /// </summary>
+        public void ExportAllForSave()
+        {
+            try
+            {
+                lock (_locker) _persistence.ExportCouncils(_councils);
+                _logger.Info("[WarCouncilManager] Exported councils for save.");
+                _stateTracker.RecordEvent("ExportedForSave", Guid.Empty, new { Count = _councils.Count });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"ExportAllForSave failed: {ex}", ex);
             }
         }
 
         /// <summary>
-        /// أضف قرارًا إلى مجلس المملكة (يُنشئ المجلس إن لم يكن موجودًا).
+        /// Imports councils from persistence adapter, replacing in-memory state.
         /// </summary>
-        public void AddDecisionToCouncil(string kingdomId, WarDecision decision)
+        public void ImportFromSave()
         {
-            if (string.IsNullOrEmpty(kingdomId) || decision == null) return;
-            lock (_lock)
+            try
             {
-                if (!_allCouncils.TryGetValue(kingdomId, out var c))
+                var imported = _persistence.ImportCouncils()?.ToList() ?? new List<WarCouncil>();
+                lock (_locker)
                 {
-                    c = new WarCouncil(kingdomId, CouncilStructure.RoyalAppointed);
-                    _allCouncils[kingdomId] = c;
+                    _councils.Clear();
+                    _councils.AddRange(imported);
                 }
-                c.AddDecision(decision);
-            }
-        }
 
-        /// <summary>
-        /// أضف تقريرًا إلى مجلس المملكة (يُنشئ المجلس إن لم يكن موجودًا).
-        /// </summary>
-        public void AddReportToCouncil(string kingdomId, WarReport report)
-        {
-            if (string.IsNullOrEmpty(kingdomId) || report == null) return;
-            lock (_lock)
+                _logger.Info($"Imported {_councils.Count} councils from save.");
+                _stateTracker.RecordEvent("ImportedFromSave", Guid.Empty, new { Count = _councils.Count });
+            }
+            catch (Exception ex)
             {
-                if (!_allCouncils.TryGetValue(kingdomId, out var c))
-                {
-                    c = new WarCouncil(kingdomId, CouncilStructure.RoyalAppointed);
-                    _allCouncils[kingdomId] = c;
-                }
-                c.AddReport(report);
+                _logger.Error($"ImportFromSave failed: {ex}", ex);
             }
         }
 
-        public IEnumerable<WarCouncil> GetAllCouncilsSnapshot()
+        #endregion
+
+        #region Utilities
+
+        private void SafeInvoke(Action action)
         {
-            lock (_lock) return _allCouncils.Values.ToList();
+            try { action(); }
+            catch (Exception ex) { _logger.Warn($"SafeInvoke caught: {ex.Message}"); }
         }
 
-        public void ClearAllCouncils()
-        {
-            lock (_lock) _allCouncils.Clear();
-        }
-
-        /// <summary>
-        /// يسمح بتغيير هيكل مجلس محدد (لإدخال منطق لعبة يتبدّل حسب الأحداث).
-        /// </summary>
-        public bool SetCouncilStructure(string kingdomId, CouncilStructure structure)
-        {
-            if (string.IsNullOrEmpty(kingdomId)) return false;
-            lock (_lock)
-            {
-                if (!_allCouncils.TryGetValue(kingdomId, out var c)) return false;
-                c.Structure = structure;
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// الحصول على مجلس عبر البحث في كل المجالس بالاسم (غير مُستخدم عادةً إن كنت تمتلك الـ key).
-        /// </summary>
-        public WarCouncil FindCouncilByKingdomId(string kingdomId)
-        {
-            if (string.IsNullOrEmpty(kingdomId)) return null;
-            lock (_lock)
-            {
-                _allCouncils.TryGetValue(kingdomId, out var c);
-                return c;
-            }
-        }
-
-        public override string ToString()
-        {
-            lock (_lock) return string.Format("WarCouncilManager: {0} councils tracked", _allCouncils.Count);
-        }
+        #endregion
     }
 }

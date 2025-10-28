@@ -1,7 +1,8 @@
 ﻿using System;
 using TaleWorlds.SaveSystem;
 
-namespace WarCouncilModern.Models
+namespace WarCouncilModern.Models.Entities
+
 {
     /// <summary>
     /// تقرير بسيط يمكن للمجلس حفظه.

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using TaleWorlds.SaveSystem;
 
-namespace WarCouncilModern.Models
+namespace WarCouncilModern.Models.Entities
+
 {
     /// <summary>
     /// تمثيل لمعسكر ميداني بسيط قابل للحفظ.

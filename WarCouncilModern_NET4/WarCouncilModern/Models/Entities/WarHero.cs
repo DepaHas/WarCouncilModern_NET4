@@ -3,7 +3,8 @@ using System.Linq;
 using TaleWorlds.SaveSystem;
 using TaleWorlds.CampaignSystem;
 
-namespace WarCouncilModern.Models
+namespace WarCouncilModern.Models.Entities
+
 {
     /// <summary>
     /// نموذج مبسّط من البطل قابل للحفظ داخل نظام WarCouncil.
