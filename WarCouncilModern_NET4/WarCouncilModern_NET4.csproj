@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F99A8626-34ED-4106-8823-4099C9086B69}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WarCouncilModern_NET4</RootNamespace>
+    <AssemblyName>WarCouncilModern_NET4</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- مراجع النظام -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <!-- مراجع Bannerlord -->
+    <Reference Include="TaleWorlds.CampaignSystem">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Core">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Library">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Library.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Localization">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Localization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.MountAndBlade">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.ObjectSystem">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.ObjectSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.SaveSystem">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.SaveSystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- ملفات الكود -->
+    <Compile Include="WarCouncilModern\Behaviors\BehaviorTemplate.cs" />
+    <Compile Include="WarCouncilModern\Common\Utilities.cs" />
+    <Compile Include="WarCouncilModern\Core\CompatibilityGuard.cs" />
+    <Compile Include="WarCouncilModern\Core\Constants.cs" />
+    <Compile Include="WarCouncilModern\Core\FeatureRegistry1.cs" />
+    <Compile Include="WarCouncilModern\Initialization\InitHelpers.cs" />
+    <Compile Include="WarCouncilModern\Core\ModSettings.cs" />
+    <Compile Include="WarCouncilModern\Logging\LogFormats.cs" />
+    <Compile Include="WarCouncilModern\Logging\ModLogger.cs" />
+    <Compile Include="WarCouncilModern\Logging\ReflectionHelpers.cs" />
+    <Compile Include="WarCouncilModern\Initialization\SubModule.cs" />
+    <Compile Include="WarCouncilModern\Behaviors\WarCouncilCampaignBehavior.cs" />
+    <Compile Include="WarCouncilModern\Behaviors\WarCouncilTestBehavior.cs" />
+    <Compile Include="WarCouncilModern\Common\CouncileRole.cs" />
+    <Compile Include="WarCouncilModern\Common\CouncilStructure.cs" />
+    <Compile Include="WarCouncilModern\Common\WarCouncilManager.cs" />
+    <Compile Include="WarCouncilModern\Models\SaveableEtClass1.cs" />
+    <Compile Include="WarCouncilModern\Models\WarCamp.cs" />
+    <Compile Include="WarCouncilModern\Models\WarCouncil.cs" />
+    <Compile Include="WarCouncilModern\Common\WarDecision.cs" />
+    <Compile Include="WarCouncilModern\Models\WarHero.cs" />
+    <Compile Include="WarCouncilModern\Models\WarReport.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarCouncilModern\Save\SaveEntities.cs" />
+    <Compile Include="WarCouncilModern\Save\SaveMigration.cs" />
+    <Compile Include="WarCouncilModern\Save\WarCouncilSaveDefiner.cs" />
+    <Compile Include="WarCouncilModern\Save\WarCouncilSaveTestBehavior.cs" />
+    <Compile Include="WarCouncilModern\UI\UIRegistry.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WarCouncilModern\docs\ARCHITECTURE.md" />
+    <None Include="WarCouncilModern\docs\DEV_GUIDE.md" />
+    <None Include="WarCouncilModern\docs\README_DEV_NOTES.md" />
+    <None Include="WarCouncilModern\docs\TEST_PLAN.md" />
+    <None Include="WarCouncilModern\github\workflows\build-x64.yml" />
+    <None Include="WarCouncilModern\github\workflows\PULL_REQUEST_TEMPLATE.md" />
+    <None Include="WarCouncilModern\ModuleData.xml" />
+    <None Include="WarCouncilModern\tools\CheckBuild.ps1" />
+    <None Include="WarCouncilModern\tools\GenerateStubs.ps1" />
+    <None Include="WarCouncilModern\tools\PostBuildCopy.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="WarCouncilModern\CouncilSystem\" />
+    <Folder Include="WarCouncilModern\examples\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

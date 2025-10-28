@@ -1,0 +1,23 @@
+﻿name: Build x64
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: microsoft/setup-msbuild@v1
+    - name: Restore
+      run: nuget restore WarCouncilModern_NET4.sln
+    - name: Build
+      run: msbuild WarCouncilModern_NET4.sln /p:Configuration=Debug /p:Platform=x64 /t:Rebuild
+    - name: Upload DLL
+      uses: actions/upload-artifact@v4
+      with:
+        name: WarCouncil_DLL
+        path: '**/bin/x64/**/*.dll'
