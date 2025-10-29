@@ -1,5 +1,4 @@
-﻿using WarCouncilModern.CouncilSystem;
-using WarCouncilModern.Models.Entities;
+﻿using WarCouncilModern.Models.Entities;
 
 namespace WarCouncilModern.Core.Services
 {

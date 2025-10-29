@@ -28,12 +28,12 @@ namespace WarCouncilModern.Core.Manager
         WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
         Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
         event Action<WarCouncil, WarDecision> DecisionProposed;
-        event Action<WarCouncil> CouncilCreated;    
+        event Action<WarCouncil> CouncilCreated;
         event Action<WarCouncil> CouncilRemoved;
     }
 
     /// <summary>
-    /// مدير المجالس: نقطة التنسيق بين النماذج والخدمات.    
+    /// مدير المجالس: نقطة التنسيق بين النماذج والخدمات.
     /// يتعامل مع state tracking, feature flags, persistence adapter, و logging.
     /// </summary>
     public class WarCouncilManager : IWarCouncilManager
@@ -94,7 +94,7 @@ namespace WarCouncilModern.Core.Manager
         {
             if (string.IsNullOrWhiteSpace(kingdomId)) throw new ArgumentException("kingdomId is required", nameof(kingdomId));
 
-            var council = new WarCouncil(kingdomId, CouncilStructure.Undefined);
+            var council = new WarCouncil(kingdomId,0); // استخدم0 كقيمة افتراضية للهيكل إذا لم يكن CouncilStructure معرفًا
             lock (_locker) _councils.Add(council);
 
             _logger.Info($"[WarCouncilManager] Created council for kingdom '{kingdomId}'.");
@@ -228,11 +228,8 @@ namespace WarCouncilModern.Core.Manager
                 return null;
             }
 
-            // استخدم المُشيد الصحيح حسب التواقيع
-            var decision = new WarDecision(Guid.NewGuid().ToString(), title, proposedBy.ToString(), "Proposed");
-            decision.Description = description ?? string.Empty;
+            var decision = new WarDecision(Guid.NewGuid().ToString(), title, description, proposedBy.ToString());
             c.AddDecision(decision);
-
             _logger.Info($"Decision proposed in council for kingdom '{c.KingdomStringId}': {title} ({decision.DecisionId}).");
             _stateTracker.RecordEvent("DecisionProposed", Guid.Empty, new { c.KingdomStringId, title });
 

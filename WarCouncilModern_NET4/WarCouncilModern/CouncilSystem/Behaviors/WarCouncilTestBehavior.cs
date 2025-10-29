@@ -1,4 +1,5 @@
 ﻿using TaleWorlds.CampaignSystem;
+using WarCouncilModern.Initialization;
 
 namespace WarCouncilModern
 {
@@ -6,13 +7,13 @@ namespace WarCouncilModern
     {
         public override void RegisterEvents()
         {
-            ModLogger.Info("WarCouncilTestBehavior.RegisterEvents called");
+            SubModule.Logger.Info("WarCouncilTestBehavior.RegisterEvents called");
             // لا تفعل شيئاً معقداً هنا
         }
 
         public override void SyncData(IDataStore dataStore)
         {
-            ModLogger.Info("WarCouncilTestBehavior.SyncData called");
+            SubModule.Logger.Info("WarCouncilTestBehavior.SyncData called");
         }
     }
 }

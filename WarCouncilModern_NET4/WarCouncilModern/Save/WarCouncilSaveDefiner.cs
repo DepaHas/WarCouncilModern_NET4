@@ -1,29 +1,24 @@
 ﻿using System.Collections.Generic;
 using TaleWorlds.SaveSystem;
-using WarCouncilModern.Models;
-using WarCouncilModern.CouncilSystem;
+using WarCouncilModern.Models.Entities;
 
 namespace WarCouncilModern.Save
 {
     public class WarCouncilSaveDefiner : SaveableTypeDefiner
     {
-        // رقم المعرف الخاص بمودك ضمن نطاق SaveableTypeDefiner
+        // رمز فريد ضمن نطاقك. تأكد أنه لا يتصادم مع مودات أخرى.
         public WarCouncilSaveDefiner() : base(2450000) { }
 
-        // تأكد أن توقيع override يطابق تعريف القاعدة في النسخة المرجعية من TaleWorlds.SaveSystem
         protected override void DefineClassTypes()
         {
             AddClassDefinition(typeof(WarHero), 10001);
             AddClassDefinition(typeof(WarCamp), 10002);
             AddClassDefinition(typeof(WarReport), 10003);
-            AddClassDefinition(typeof(SaveableEtClass1), 10004);
-
-            AddClassDefinition(typeof(WarDecision), 10005);
-            AddClassDefinition(typeof(WarCouncil), 10006);
-            AddClassDefinition(typeof(WarCouncilManager), 10007);
+            AddClassDefinition(typeof(WarDecision), 10004);
+            AddClassDefinition(typeof(WarCouncil), 10005);
+            // لا تُسجّل المدير أو أنواع غير قابلة للحفظ هنا
         }
 
-        // تأكد أن توقيع override يطابق تعريف القاعدة — غالباً protected override
         protected override void DefineContainerDefinitions()
         {
             ConstructContainerDefinition(typeof(List<WarHero>));
@@ -34,7 +29,6 @@ namespace WarCouncilModern.Save
             ConstructContainerDefinition(typeof(Dictionary<string, WarCouncil>));
         }
 
-        // تأكد أن توقيع override يطابق تعريف القاعدة — غالباً protected override
         protected override void DefineEnumTypes()
         {
             AddEnumDefinition(typeof(CouncilRole), 1);

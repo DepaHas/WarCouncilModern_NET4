@@ -28,18 +28,18 @@ namespace WarCouncilModern.Core.Manager
         WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
         Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
         event Action<WarCouncil, WarDecision> DecisionProposed;
-        event Action<WarCouncil> CouncilCreated;    
+        event Action<WarCouncil> CouncilCreated;
         event Action<WarCouncil> CouncilRemoved;
     }
 
     /// <summary>
-    /// مدير المجالس: نقطة التنسيق بين النماذج والخدمات.    
+    /// مدير المجالس: نقطة التنسيق بين النماذج والخدمات.
     /// يتعامل مع state tracking, feature flags, persistence adapter, و logging.
     /// </summary>
     public class WarCouncilManager : IWarCouncilManager
     {
-        private readonly List<WarCouncil> _councils = new List<WarCouncil>();
-        private readonly object _locker = new object();
+        private readonly List<WarCouncil> _councils = new();
+        private readonly object _locker = new();
 
         private readonly ICouncilMeetingService _meetingService;
         private readonly IDecisionProcessingService _decisionService;
@@ -90,15 +90,15 @@ namespace WarCouncilModern.Core.Manager
         /// <summary>
         /// Creates a new War Council for the specified faction.
         /// </summary>
-        public WarCouncil CreateCouncil(string kingdomId, string structure = "", string leaderHeroId = "")
+        public WarCouncil CreateCouncil(string name, string factionId, string location = "")
         {
-            if (string.IsNullOrWhiteSpace(kingdomId)) throw new ArgumentException("kingdomId is required", nameof(kingdomId));
+            if (string.IsNullOrWhiteSpace(factionId)) throw new ArgumentException("factionId is required", nameof(factionId));
 
-            var council = new WarCouncil(kingdomId, CouncilStructure.Undefined);
+            var council = new WarCouncil(name ?? "Council", factionId, location ?? string.Empty);
             lock (_locker) _councils.Add(council);
 
-            _logger.Info($"[WarCouncilManager] Created council for kingdom '{kingdomId}'.");
-            _stateTracker.RecordEvent("CouncilCreated", Guid.Empty, new { kingdomId });
+            _logger.Info($"[WarCouncilManager] Created council '{council.Name}' for faction '{factionId}' ({council.SaveId}).");
+            _stateTracker.RecordEvent("CouncilCreated", council.SaveId, new { council.Name, council.FactionId });
 
             SafeInvoke(() =>
             {
@@ -113,29 +113,29 @@ namespace WarCouncilModern.Core.Manager
         /// <summary>
         /// Returns council by SaveId or null.
         /// </summary>
-        public WarCouncil GetCouncilById(Guid id)
+        public WarCouncil GetCouncilById(Guid saveId)
         {
-            lock (_locker) return _councils.FirstOrDefault(c => c.KingdomStringId == id.ToString());
+            lock (_locker) return _councils.FirstOrDefault(c => c.SaveId == saveId);
         }
 
         /// <summary>
         /// Returns the first council matching the factionId or null.
         /// </summary>
-        public WarCouncil GetCouncilByFaction(string kingdomId)
+        public WarCouncil GetCouncilByFaction(string factionId)
         {
-            if (string.IsNullOrWhiteSpace(kingdomId)) return null;
-            lock (_locker) return _councils.FirstOrDefault(c => c.KingdomStringId == kingdomId);
+            if (string.IsNullOrWhiteSpace(factionId)) return null;
+            lock (_locker) return _councils.FirstOrDefault(c => c.FactionId == factionId);
         }
 
         /// <summary>
         /// Removes council by SaveId.
         /// </summary>
-        public bool RemoveCouncil(Guid id)
+        public bool RemoveCouncil(Guid saveId)
         {
             WarCouncil removed = null;
             lock (_locker)
             {
-                var c = _councils.FirstOrDefault(x => x.KingdomStringId == id.ToString());
+                var c = _councils.FirstOrDefault(x => x.SaveId == saveId);
                 if (c == null) return false;
                 _councils.Remove(c);
                 removed = c;
@@ -143,8 +143,8 @@ namespace WarCouncilModern.Core.Manager
 
             if (removed != null)
             {
-                _logger.Info($"[WarCouncilManager] Removed council for kingdom '{removed.KingdomStringId}'.");
-                _stateTracker.RecordEvent("CouncilRemoved", Guid.Empty, new { removed.KingdomStringId });
+                _logger.Info($"[WarCouncilManager] Removed council '{removed.Name}' ({saveId}).");
+                _stateTracker.RecordEvent("CouncilRemoved", removed.SaveId, new { removed.Name, removed.FactionId });
                 CouncilRemoved?.Invoke(removed);
             }
 
@@ -180,10 +180,12 @@ namespace WarCouncilModern.Core.Manager
             var added = false;
             try
             {
-                c.AddMemberById(hero.HeroStringId);
-                added = true;
-                _logger.Debug($"Added member '{hero.Name}' to council for kingdom '{c.KingdomStringId}'.");
-                _stateTracker.RecordEvent("MemberAdded", Guid.Empty, new { hero.HeroStringId, hero.Name });
+                added = c.AddMember(hero);
+                if (added)
+                {
+                    _logger.Debug($"Added member '{hero.Name}' to council '{c.Name}'.");
+                    _stateTracker.RecordEvent("MemberAdded", c.SaveId, new { hero.SaveId, hero.Name });
+                }
             }
             catch (Exception ex)
             {
@@ -196,13 +198,13 @@ namespace WarCouncilModern.Core.Manager
         /// <summary>
         /// Removes a member from the specified council.
         /// </summary>
-        public bool RemoveMemberFromCouncil(Guid councilId, Guid heroId)
+        public bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId)
         {
             var c = GetCouncilById(councilId);
             if (c == null) return false;
 
-            var removed = c.RemoveMemberById(heroId.ToString());
-            if (removed) _stateTracker.RecordEvent("MemberRemoved", Guid.Empty, new { heroId });
+            var removed = c.RemoveMember(heroSaveId);
+            if (removed) _stateTracker.RecordEvent("MemberRemoved", c.SaveId, new { heroSaveId });
             return removed;
         }
 
@@ -228,13 +230,9 @@ namespace WarCouncilModern.Core.Manager
                 return null;
             }
 
-            // استخدم المُشيد الصحيح حسب التواقيع
-            var decision = new WarDecision(Guid.NewGuid().ToString(), title, proposedBy.ToString(), "Proposed");
-            decision.Description = description ?? string.Empty;
-            c.AddDecision(decision);
-
-            _logger.Info($"Decision proposed in council for kingdom '{c.KingdomStringId}': {title} ({decision.DecisionId}).");
-            _stateTracker.RecordEvent("DecisionProposed", Guid.Empty, new { c.KingdomStringId, title });
+            var decision = c.CreateDecision(title, description, proposedBy);
+            _logger.Info($"Decision proposed in '{c.Name}': {title} ({decision.SaveId}).");
+            _stateTracker.RecordEvent("DecisionProposed", decision.SaveId, new { c.SaveId, title });
 
             SafeInvoke(() =>
             {
@@ -262,7 +260,7 @@ namespace WarCouncilModern.Core.Manager
             if (autoProcess)
             {
                 // run async fire-and-forget but capture errors
-                _ = ProcessDecisionAsync(councilId, new Guid(decision.DecisionId));
+                _ = ProcessDecisionAsync(c.SaveId, decision.SaveId);
             }
 
             return decision;
@@ -276,24 +274,24 @@ namespace WarCouncilModern.Core.Manager
             var c = GetCouncilById(councilId);
             if (c == null) return false;
 
-            var d = c.Decisions.FirstOrDefault(x => x.DecisionId == decisionId.ToString());
+            var d = c.GetDecision(decisionId);
             if (d == null) return false;
 
             try
             {
-                _logger.Info($"Processing decision {d.DecisionId} for council for kingdom {c.KingdomStringId}.");
+                _logger.Info($"Processing decision {d.SaveId} for council {c.Name}.");
                 var result = await _decisionService.ProcessDecisionAsync(c, d).ConfigureAwait(false);
 
-                d.Description = result ? "Executed" : "Failed";
-                _logger.Info($"Decision {d.DecisionId} processing result: {d.Description}.");
-                _stateTracker.RecordEvent("DecisionProcessed", Guid.Empty, new { c.KingdomStringId, d.Description });
+                d.Status = result ? "Executed" : "Failed";
+                _logger.Info($"Decision {d.SaveId} processing result: {d.Status}.");
+                _stateTracker.RecordEvent("DecisionProcessed", d.SaveId, new { c.SaveId, d.Status });
                 return result;
             }
             catch (Exception ex)
             {
                 _logger.Error($"Decision processing error: {ex}", ex);
-                d.Description = "Error";
-                _stateTracker.RecordEvent("DecisionProcessError", Guid.Empty, new { ex.Message });
+                d.Status = "Error";
+                _stateTracker.RecordEvent("DecisionProcessError", d.SaveId, new { ex.Message });
                 return false;
             }
         }

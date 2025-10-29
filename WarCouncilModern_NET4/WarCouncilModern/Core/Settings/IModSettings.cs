@@ -2,7 +2,8 @@
 {
     public interface IModSettings
     {
-        bool AutoProcessDecisions { get; }
-        bool AutoScheduleMeetingOnProposal { get; }
+        bool EnableFeatureX { get; set; }
+        int SomeNumericSetting { get; set; }
+        string? OptionalString { get; set; }
     }
 }

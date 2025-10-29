@@ -2,38 +2,33 @@
 using TaleWorlds.SaveSystem;
 
 namespace WarCouncilModern.Models.Entities
-
 {
-    /// <summary>
-    /// تقرير بسيط يمكن للمجلس حفظه.
-    /// </summary>
     public class WarReport
     {
         [SaveableField(1)] private string _reportId;
-        [SaveableField(2)] private string _content;
-        [SaveableField(3)] private DateTime _createdAt;
+        [SaveableField(2)] private string _summary;
+        [SaveableField(3)] private string _details;
+        [SaveableField(4)] private long _createdTicks;
 
         public WarReport()
         {
-            _reportId = string.Empty;
-            _content = string.Empty;
-            _createdAt = DateTime.UtcNow;
+            _reportId = Guid.NewGuid().ToString();
+            _summary = string.Empty;
+            _details = string.Empty;
+            _createdTicks = DateTime.UtcNow.Ticks;
         }
 
-        public WarReport(string id, string content)
+        public WarReport(string summary, string details) : this()
         {
-            _reportId = id ?? string.Empty;
-            _content = content ?? string.Empty;
-            _createdAt = DateTime.UtcNow;
+            _summary = summary ?? string.Empty;
+            _details = details ?? string.Empty;
         }
 
-        public string ReportId { get { return _reportId; } set { _reportId = value ?? string.Empty; } }
-        public string Content { get { return _content; } set { _content = value ?? string.Empty; } }
-        public DateTime CreatedAt { get { return _createdAt; } set { _createdAt = value; } }
+        public string ReportId { get { return _reportId; } set { _reportId = value ?? Guid.NewGuid().ToString(); } }
+        public string Summary { get { return _summary; } set { _summary = value ?? string.Empty; } }
+        public string Details { get { return _details; } set { _details = value ?? string.Empty; } }
+        public DateTime CreatedAtUtc { get { return new DateTime(_createdTicks, DateTimeKind.Utc); } set { _createdTicks = value.ToUniversalTime().Ticks; } }
 
-        public override string ToString()
-        {
-            return string.Format("Report {0} created at {1:u}", ReportId, CreatedAt);
-        }
+        public override string ToString() => $"Report[{ReportId}]: {Summary}";
     }
 }

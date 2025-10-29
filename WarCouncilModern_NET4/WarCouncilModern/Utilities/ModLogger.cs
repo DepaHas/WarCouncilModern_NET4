@@ -1,28 +1,27 @@
 ﻿using System;
 using WarCouncilModern.Utilities.Interfaces;
 
-namespace WarCouncilModern.Utilities
+namespace WarCouncilModern.Utilities.Logging
 {
     public class ModLogger : IModLogger
     {
         private readonly string _prefix;
+        public ModLogger(string prefix = "WarCouncil") { _prefix = prefix; }
 
-        public ModLogger(string prefix = "WarCouncil")
+        public void Info(string message) => Log("INFO", message);
+        public void Warn(string message) => Log("WARN", message);
+        public void Debug(string message) => Log("DEBUG", message);
+        public void Error(string message) => Error(message, null);
+        public void Error(string message, Exception? ex)
         {
-            _prefix = prefix;
+            var payload = ex == null ? message : $"{message} | Exception: {ex}";
+            Log("ERROR", payload);
         }
 
-        public void Debug(string message) => Write("DEBUG", message);
-        public void Info(string message) => Write("INFO", message);
-        public void Warn(string message) => Write("WARN", message);
-        public void Error(string message) => Write("ERROR", message);
-        public void Error(string message, Exception ex) => Write("ERROR", $"{message} - Exception: {ex}");
-
-        private void Write(string level, string msg)
+        private void Log(string level, string message)
         {
-            var text = $"[{_prefix}] [{level}] {msg}";
-            // هنا تضع آلية السجل الفعلية: ملف، TaleWorlds.Logging، أو Console
-            System.Diagnostics.Debug.WriteLine(text);
+            try { System.Diagnostics.Debug.WriteLine($"[{_prefix}][{level}] {message}"); }
+            catch { }
         }
     }
 }

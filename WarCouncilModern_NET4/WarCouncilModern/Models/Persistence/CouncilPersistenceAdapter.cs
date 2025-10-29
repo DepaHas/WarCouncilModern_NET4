@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using WarCouncilModern.CouncilSystem;
 using WarCouncilModern.Models.Entities;
 
 namespace WarCouncilModern.Models.Persistence
@@ -8,7 +7,7 @@ namespace WarCouncilModern.Models.Persistence
     public class CouncilPersistenceAdapter : IPersistenceAdapter
     {
         // تنفيذ مبسّط: يمكن استبداله بربط مع Save system الخاص باللعبة
-        private readonly List<WarCouncil> _store = new();
+        private readonly List<WarCouncil> _store = new List<WarCouncil>();
 
         public void ExportCouncils(IEnumerable<WarCouncil> councils)
         {

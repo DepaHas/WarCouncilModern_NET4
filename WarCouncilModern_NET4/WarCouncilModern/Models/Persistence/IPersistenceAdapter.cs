@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WarCouncilModern.CouncilSystem;
 using WarCouncilModern.Models.Entities;
 
 namespace WarCouncilModern.Models.Persistence

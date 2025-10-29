@@ -1,13 +1,15 @@
-﻿namespace WarCouncilModern.Core
-{
-    public static class ModSettings
-    {
-        // Feature flags — افتراضيًا false لحماية التشغيل
-        public static bool EnableWarCouncilLogic { get; set; } = false;
-        public static bool EnableSaveTests { get; set; } = false;
-        public static bool EnableUI { get; set; } = false;
+﻿using WarCouncilModern.Core.Settings;
 
-        // Runtime-overrides for dev use (can be set from SubModule on startup)
-        public static void ApplyDefaults() { }
+namespace WarCouncilModern.Models.Settings
+{
+    public class ModSettings : IModSettings
+    {
+        public bool EnableFeatureX { get; set; } = true;
+        public int SomeNumericSetting { get; set; } = 10;
+        public string? OptionalString { get; set; } = string.Empty;
+
+        public ModSettings() { }
+
+        public static ModSettings CreateDefault() => new ModSettings();
     }
 }

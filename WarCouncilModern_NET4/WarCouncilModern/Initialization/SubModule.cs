@@ -1,90 +1,96 @@
 ﻿using System;
-using TaleWorlds.CampaignSystem;
-using TaleWorlds.Core;
+using System.Reflection;
 using TaleWorlds.MountAndBlade;
+using WarCouncilModern.Utilities;
+using WarCouncilModern.Utilities.Interfaces;
+using WarCouncilModern.Save;
 
-namespace WarCouncilModern
+namespace WarCouncilModern.Initialization
 {
     public class SubModule : MBSubModuleBase
     {
+        internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
+
         protected override void OnSubModuleLoad()
         {
-            ModLogger.Init();
-            ModLogger.Info("OnSubModuleLoad start");
-            try
-            {
-                // علّق تسجيلات تعريفات ونماذج الحفظ الثقيلة أثناء التطوير المبكر
-                // RegisterDefinitions(); // تعليق مؤقت إن كان موجوداً
-            }
-            catch (Exception ex)
-            {
-                ModLogger.Error("OnSubModuleLoad exception", ex);
-            }
-            ModLogger.Info("OnSubModuleLoad end");
             base.OnSubModuleLoad();
-        }
 
-        protected override void OnGameStart(Game game, IGameStarter starterObject)
-        {
-            ModLogger.Info("OnGameStart start");
             try
             {
-                // سجل Assemblies المحمّلة لمساعدة التشخيص
-                foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-                    ModLogger.Info($"Assembly Loaded: {a.FullName}");
-
-                if (Campaign.Current == null)
-                {
-                    ModLogger.Warn("Campaign.Current is null — skipping campaign init");
-                    return;
-                }
-
-                // إضافة سلوك اختبار بسيط بأمان
-                SafeAddBehavior(starterObject, typeof(WarCouncilTestBehavior));
-
-                // لاحقاً: قم بإضافة سلوكك الحقيقي تدريجياً واحرص على تغطيته بـ try/catch
-                // SafeAddBehavior(starterObject, typeof(WarCouncilBehavior));
+                Logger.Info("SubModule loading - WarCouncilModern initializing.");
+                RegisterSaveDefinerSafely();
+                Logger.Info("SubModule loaded successfully.");
             }
             catch (Exception ex)
             {
-                ModLogger.Error("OnGameStart exception", ex);
+                try { Logger.Error("SubModule.OnSubModuleLoad exception", ex); } catch { }
             }
-            ModLogger.Info("OnGameStart end");
-            base.OnGameStart(game, starterObject);
         }
 
-        private void SafeAddBehavior(IGameStarter starter, Type behaviorType)
+        protected override void OnBeforeInitialModuleScreenSetAsRoot()
+        {
+            base.OnBeforeInitialModuleScreenSetAsRoot();
+            // Hook for UI initialization or late game setup if needed
+        }
+
+        protected override void OnSubModuleUnloaded()
         {
             try
             {
-                if (starter == null) { ModLogger.Warn("starter is null in SafeAddBehavior"); return; }
-
-                var ctor = behaviorType.GetConstructor(Type.EmptyTypes);
-                if (ctor == null) { ModLogger.Warn($"No parameterless ctor for {behaviorType.FullName}"); return; }
-                var behavior = (CampaignBehaviorBase)ctor.Invoke(null);
-
-                // حاول التحويل إلى CampaignGameStarter أولاً
-                if (starter is CampaignGameStarter campaignStarter)
-                {
-                    campaignStarter.AddBehavior(behavior);
-                    ModLogger.Info($"Added behavior {behaviorType.FullName} to CampaignGameStarter");
-                    return;
-                }
-
-                // بعض إصدارات الـ API قد تستخدم GameStarterBase أو أنواع أخرى. حاول البحث عن طريقة AddBehavior عبر reflection كخطة احتياطية:
-                var addMethod = starter.GetType().GetMethod("AddBehavior");
-                if (addMethod != null)
-                {
-                    addMethod.Invoke(starter, new object[] { behavior });
-                    ModLogger.Info($"Added behavior {behaviorType.FullName} via reflection to {starter.GetType().FullName}");
-                    return;
-                }
-
-                ModLogger.Warn($"No AddBehavior found on starter type {starter.GetType().FullName}; behavior not added.");
+                Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
+                // perform cleanup if necessary
             }
             catch (Exception ex)
             {
-                ModLogger.Error($"Failed to add behavior {behaviorType.FullName}", ex);
+                try { Logger.Error("SubModule.OnSubModuleUnloaded exception", ex); } catch { }
+            }
+            finally
+            {
+                base.OnSubModuleUnloaded();
+            }
+        }
+
+        // Registers WarCouncilSaveDefiner using reflection-safe approach to support multiple TaleWorlds.SaveSystem versions.
+        private void RegisterSaveDefinerSafely()
+        {
+            try
+            {
+                var definer = new WarCouncilSaveDefiner();
+
+                // Try SaveTypeRegistry.Instance.AddTypeDefiner(definer)
+                var registryType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeRegistry, TaleWorlds.SaveSystem");
+                if (registryType != null)
+                {
+                    var instanceProp = registryType.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public);
+                    var instance = instanceProp?.GetValue(null);
+                    if (instance != null)
+                    {
+                        var addMethod = registryType.GetMethod("AddTypeDefiner", new Type[] { definer.GetType() });
+                        if (addMethod != null)
+                        {
+                            addMethod.Invoke(instance, new object[] { definer });
+                            Logger.Info("WarCouncilSaveDefiner registered via SaveTypeRegistry.Instance.AddTypeDefiner.");
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback to static SaveTypeDefiner.AddTypeDefiner(definer)
+                var definerType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeDefiner, TaleWorlds.SaveSystem");
+                var addStatic = definerType?.GetMethod("AddTypeDefiner", BindingFlags.Static | BindingFlags.Public);
+                if (addStatic != null)
+                {
+                    addStatic.Invoke(null, new object[] { definer });
+                    Logger.Info("WarCouncilSaveDefiner registered via SaveTypeDefiner.AddTypeDefiner fallback.");
+                    return;
+                }
+
+                // If neither approach available, log a warning
+                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner for this TaleWorlds.SaveSystem version.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to construct/register WarCouncilSaveDefiner", ex);
             }
         }
     }

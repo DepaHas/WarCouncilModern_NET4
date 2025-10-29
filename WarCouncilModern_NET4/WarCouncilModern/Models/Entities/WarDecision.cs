@@ -2,55 +2,46 @@
 using TaleWorlds.SaveSystem;
 
 namespace WarCouncilModern.Models.Entities
-
 {
     public class WarDecision
     {
         [SaveableField(1)] private string _decisionId;
         [SaveableField(2)] private string _title;
         [SaveableField(3)] private string _description;
-        [SaveableField(4)] private DateTime _timestamp;
-        [SaveableField(5)] private string _madeByHeroId;
+        [SaveableField(4)] private string _status;
+        [SaveableField(5)] private string _proposedByHeroId;
+        [SaveableField(6)] private long _proposedTicks;
 
         public WarDecision()
         {
-            _decisionId = string.Empty;
+            _decisionId = Guid.NewGuid().ToString();
             _title = string.Empty;
             _description = string.Empty;
-            _timestamp = DateTime.UtcNow;
-            _madeByHeroId = string.Empty;
+            _status = "Proposed";
+            _proposedByHeroId = string.Empty;
+            _proposedTicks = DateTime.UtcNow.Ticks;
         }
 
-        public WarDecision(string id, string title, string description, string madeByHeroId)
+        // مُشيد مطابق لاستدعاءات WarCouncilManager(4 args)
+        public WarDecision(string decisionId, string title, string proposedByHeroId, string status) : this()
         {
-            _decisionId = id ?? string.Empty;
+            _decisionId = decisionId ?? Guid.NewGuid().ToString();
             _title = title ?? string.Empty;
-            _description = description ?? string.Empty;
-            _timestamp = DateTime.UtcNow;
-            _madeByHeroId = madeByHeroId ?? string.Empty;
+            _proposedByHeroId = proposedByHeroId ?? string.Empty;
+            _status = status ?? "Proposed";
+            _proposedTicks = DateTime.UtcNow.Ticks;
         }
 
-        public string DecisionId { get { return _decisionId; } set { _decisionId = value ?? string.Empty; } }
+        // القرار يظهر أن الكود يستعمل DecisionId و SaveId أحيانًا؛ احتفظ بكليهما لكن اجعل DecisionId مرجعي
+        public string DecisionId { get { return _decisionId; } set { _decisionId = value ?? Guid.NewGuid().ToString(); } }
+        public string SaveId { get { return _decisionId; } set { _decisionId = value ?? Guid.NewGuid().ToString(); } }
+
         public string Title { get { return _title; } set { _title = value ?? string.Empty; } }
         public string Description { get { return _description; } set { _description = value ?? string.Empty; } }
-        public DateTime Timestamp { get { return _timestamp; } } // قراءة فقط لثبات الطابع
-        public string MadeByHeroId { get { return _madeByHeroId; } set { _madeByHeroId = value ?? string.Empty; } }
+        public string Status { get { return _status; } set { _status = value ?? string.Empty; } }
+        public string ProposedByHeroId { get { return _proposedByHeroId; } set { _proposedByHeroId = value ?? string.Empty; } }
+        public DateTime ProposedAtUtc { get { return new DateTime(_proposedTicks, DateTimeKind.Utc); } set { _proposedTicks = value.ToUniversalTime().Ticks; } }
 
-        public override string ToString()
-        {
-            return string.Format("Decision {0}: {1} by {2} at {3:u}", DecisionId, Title, MadeByHeroId, Timestamp);
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as WarDecision;
-            if (other == null) return false;
-            return string.Equals(_decisionId, other._decisionId, StringComparison.Ordinal);
-        }
-
-        public override int GetHashCode()
-        {
-            return StringComparer.Ordinal.GetHashCode(_decisionId ?? string.Empty);
-        }
+        public override string ToString() => $"Decision[{DecisionId}]: {Title} ({Status})";
     }
 }
