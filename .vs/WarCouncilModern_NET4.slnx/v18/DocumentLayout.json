@@ -3,15 +3,55 @@
   "WorkspaceRootPath": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\initialization\\inithelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\initialization\\inithelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\services\\stubadvisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\services\\stubadvisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\services\\iadvisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\services\\iadvisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\imodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\imodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\modsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\modsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\imodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\imodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\stubmodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\settings\\stubmodsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\utilities\\reflection\\reflectionhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\manager\\warcouncilmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\manager\\warcouncilmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\utilities\\logging\\modlogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\utilities\\logging\\modlogger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\services\\advisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\services\\advisorservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\init\\moduleinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\init\\moduleinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\models\\entities\\warcamp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\models\\entities\\warcamp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\utilities\\globallog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\utilities\\globallog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\warcouncilmodern_net4\\warcouncilmodern\\utilities\\reflection\\reflectionhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\utilities\\reflection\\reflectionhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -22,8 +62,125 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ModLogger.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Logging\\ModLogger.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Logging\\ModLogger.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Logging\\ModLogger.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Logging\\ModLogger.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAApwCoAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:47:23.61Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "InitHelpers.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Initialization\\InitHelpers.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Initialization\\InitHelpers.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Initialization\\InitHelpers.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Initialization\\InitHelpers.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:47:21.122Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "WarCouncilManager.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Manager\\WarCouncilManager.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Manager\\WarCouncilManager.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Manager\\WarCouncilManager.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Manager\\WarCouncilManager.cs",
+              "ViewState": "AgIAAGgAAAAAAAAAAAAqwH0AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:47:12.077Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "WarCamp.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Models\\Entities\\WarCamp.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Models\\Entities\\WarCamp.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Models\\Entities\\WarCamp.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Models\\Entities\\WarCamp.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAgwEUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:33:57.45Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AdvisorService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\AdvisorService.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\AdvisorService.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\AdvisorService.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\AdvisorService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:32:07.786Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IAdvisorService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\IAdvisorService.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\IAdvisorService.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\IAdvisorService.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\IAdvisorService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:31:56.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "GlobalLog.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\GlobalLog.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\GlobalLog.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\GlobalLog.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\GlobalLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:30:38.314Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ModuleInitializer.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Init\\ModuleInitializer.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Init\\ModuleInitializer.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Init\\ModuleInitializer.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Init\\ModuleInitializer.cs",
+              "ViewState": "AgIAAE0AAAAAAAAAAAAgwHkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:27:42.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "StubAdvisorService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\StubAdvisorService.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\StubAdvisorService.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\StubAdvisorService.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Services\\StubAdvisorService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:26:09.452Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
@@ -38,33 +195,46 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 5,
+              "Title": "StubModSettings.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\StubModSettings.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\StubModSettings.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\StubModSettings.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\StubModSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-29T00:20:48.14Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "ModSettings.cs",
               "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\ModSettings.cs",
               "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\ModSettings.cs",
               "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\ModSettings.cs",
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\ModSettings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-29T00:14:14.843Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "IModSettings.cs",
               "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\IModSettings.cs",
               "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\IModSettings.cs",
               "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\IModSettings.cs",
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Settings\\IModSettings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-29T00:13:58.963Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 12,
               "Title": "ReflectionHelpers.cs",
               "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Reflection\\ReflectionHelpers.cs",
               "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Reflection\\ReflectionHelpers.cs",
@@ -72,8 +242,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Utilities\\Reflection\\ReflectionHelpers.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAALkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-28T23:44:41.215Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-28T23:44:41.215Z"
             }
           ]
         }

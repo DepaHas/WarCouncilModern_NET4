@@ -4,83 +4,69 @@ using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.State;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Models.Persistence;
-using WarCouncilModern.Models.Settings;
+using WarCouncilModern.Core.Settings;
+using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
-using WarCouncilModern.Utilities.Logging;
 
 namespace WarCouncilModern.Core.Init
 {
+    /// <summary>
+    /// مسؤول تهيئة اعتمادات المود وإنشاء WarCouncilManager بشكل آمن.
+    /// لاحظ: استدعاء new WarCouncilManager(...) يمرِّر الوسائط بالترتيب positional.
+    /// إن اختلف توقيع باني WarCouncilManager لديك، أرسل header الباني لأعيد كتابة الاستدعاء بدقة.
+    /// </summary>
     public class ModuleInitializer
     {
         private WarCouncilManager? _manager;
         private IFeatureRegistry? _featureRegistry;
-        private IModLogger? _logger;
+        private IModLogger _logger;
         private IModStateTracker? _stateTracker;
         private IPersistenceAdapter? _persistence;
         private ICouncilMeetingService? _meetingService;
         private IDecisionProcessingService? _decisionService;
         private IAdvisorService? _advisorService;
-        private ModSettings? _settings;
+        private IModSettings _settings;
 
         public ModuleInitializer()
         {
-            // تهيئة افتراضية بسيطة لتجنّب أخطاء الحقول غير المهيأة
-            _logger = new ModLogger("WarCouncil");
-            _settings = ModSettings.CreateDefault();
+            // قيم افتراضية لتجنّب CS8618 وللسقوف الآمنة أثناء التطوير
+            _logger = GlobalLog.Instance;
+            _settings = new StubModSettings();
         }
 
+        /// <summary>
+        /// تهيئة الاعتمادات المطلوبة للمود.
+        /// استخدم هذا الأسلوب من SubModule أو من مكان تهيئة أعلى.
+        /// </summary>
         public void Initialize(
             IFeatureRegistry featureRegistry,
-            IModLogger logger,
+            IModLogger? logger,
             IModStateTracker stateTracker,
             IPersistenceAdapter persistence,
             ICouncilMeetingService meetingService,
             IDecisionProcessingService decisionService,
-            IAdvisorService advisorService,
-            ModSettings settings
+            IAdvisorService? advisorService,
+            IModSettings? settings
         )
         {
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
             _logger = logger ?? _logger;
             _stateTracker = stateTracker ?? throw new ArgumentNullException(nameof(stateTracker));
             _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
-            _meeting_service_fix(meetingService);
+            _meetingService = meetingService ?? throw new ArgumentNullException(nameof(meetingService));
             _decisionService = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
             _advisor_service_fix(advisorService);
-            _settings = settings ?? _settings ?? ModSettings.CreateDefault();
+            _settings = settings ?? _settings;
 
-            // أنشئ الـ manager بالمرور positional لتجنّب named-argument mismatch
-            _manager = new WarCouncilManager(
-                _meetingService!,
-                _decisionService!,
-                _advisorService!,
-                _settings,
-                _logger!,
-                _persistence!,
-                _stateTracker!,
-                _featureRegistry!
-            );
-
-            _logger?.Info("ModuleInitializer: WarCouncilManager created.");
-        }
-
-        private void _meeting_service_fix(ICouncilMeetingService? svc)
-        {
-            if (svc == null)
-            {
-                // ضع هنا stub أو throw حسب رغبتك؛ الآن نستخدم throw لتفادي التشغيل بغير خدمة مهمة
-                throw new ArgumentNullException(nameof(svc), "MeetingService cannot be null");
-            }
-            _meetingService = svc;
+            CreateManagerSafely();
         }
 
         private void _advisor_service_fix(IAdvisorService? svc)
         {
             if (svc == null)
             {
-                // يمكنك استبدال الـ stub بأسلوبك الخاص
-                _advisorService = new StubAdvisorService();
-                _logger?.Warn("AdvisorService was null; using stub fallback.");
+                _advisorService = new StubAdvisorService(_logger);
+                _logger.Warn("AdvisorService was null; using StubAdvisorService as fallback.");
             }
             else
             {
@@ -88,12 +74,49 @@ namespace WarCouncilModern.Core.Init
             }
         }
 
+        private void CreateManagerSafely()
+        {
+            try
+            {
+                // مرّر positional لتجنّب مشكلة named-argument mismatch
+                _manager = new WarCouncilManager(
+                    _meetingService!,
+                    _decisionService!,
+                    _advisorService!,
+                    _settings,
+                    _logger,
+                    _persistence!,
+                    _stateTracker!,
+                    _featureRegistry!
+                );
+
+                _logger.Info("WarCouncilManager instantiated successfully.");
+            }
+            catch (MissingMethodException mex)
+            {
+                _logger.Error("Constructor mismatch when creating WarCouncilManager", mex);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Unexpected error creating WarCouncilManager", ex);
+                throw;
+            }
+        }
+
         public WarCouncilManager? Manager => _manager;
 
         public void Shutdown()
         {
-            _logger?.Info("ModuleInitializer.Shutdown called.");
-            _manager = null;
+            try
+            {
+                _logger.Info("ModuleInitializer.Shutdown called.");
+                _manager = null;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Error during ModuleInitializer.Shutdown", ex);
+            }
         }
     }
 }

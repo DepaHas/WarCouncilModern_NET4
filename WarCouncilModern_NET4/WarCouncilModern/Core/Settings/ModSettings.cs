@@ -6,7 +6,7 @@ namespace WarCouncilModern.Models.Settings
     {
         public bool EnableFeatureX { get; set; } = true;
         public int SomeNumericSetting { get; set; } = 10;
-        public string? OptionalString { get; set; } = string.Empty;
+        public string OptionalString { get; set; } = string.Empty;
 
         public ModSettings() { }
 

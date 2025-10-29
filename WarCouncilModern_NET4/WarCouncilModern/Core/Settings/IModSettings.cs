@@ -4,6 +4,6 @@
     {
         bool EnableFeatureX { get; set; }
         int SomeNumericSetting { get; set; }
-        string? OptionalString { get; set; }
+        string OptionalString { get; set; }
     }
 }

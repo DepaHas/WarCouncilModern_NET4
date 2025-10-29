@@ -1,5 +1,7 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaleWorlds.SaveSystem;
 
 namespace WarCouncilModern.Models.Entities
@@ -7,48 +9,62 @@ namespace WarCouncilModern.Models.Entities
     public class WarCamp
     {
         [SaveableField(1)] private string _campId;
-        [SaveableField(2)] private string _locationId;
+        [SaveableField(2)] private string _locationName;
         [SaveableField(3)] private List<string> _assignedHeroIds;
-        [SaveableField(4)] private long _createdTicks;
-
-        private readonly object _lock = new object();
+        [SaveableField(4)] private DateTime _createdAtUtcTicks;
 
         public WarCamp()
         {
             _campId = Guid.NewGuid().ToString();
-            _locationId = string.Empty;
+            _locationName = string.Empty;
             _assignedHeroIds = new List<string>();
-            _createdTicks = DateTime.UtcNow.Ticks;
+            _createdAtUtcTicks = DateTime.UtcNow;
         }
 
-        public WarCamp(string campId, string locationId, IEnumerable<string> heroIds = null) : this()
+        public WarCamp(string campId, string locationName, IEnumerable<string>? assignedHeroIds = null)
+            : this()
         {
-            _campId = campId ?? Guid.NewGuid().ToString();
-            _locationId = locationId ?? string.Empty;
-            if (heroIds != null) _assignedHeroIds.AddRange(heroIds);
+            _campId = string.IsNullOrEmpty(campId) ? Guid.NewGuid().ToString() : campId;
+            _locationName = locationName ?? string.Empty;
+            // امنع تمرير null مباشرة إلى List ctor
+            _assignedHeroIds = new List<string>(assignedHeroIds ?? Enumerable.Empty<string>());
+            _createdAtUtcTicks = DateTime.UtcNow;
         }
 
-        public string CampId { get { lock (_lock) return _campId; } set { lock (_lock) _campId = value ?? Guid.NewGuid().ToString(); } }
-        public string LocationId { get { lock (_lock) return _locationId; } set { lock (_lock) _locationId = value ?? string.Empty; } }
-        public IReadOnlyList<string> AssignedHeroIds { get { lock (_lock) return _assignedHeroIds.ToArray(); } }
+        public string CampId
+        {
+            get => _campId;
+            set => _campId = value ?? Guid.NewGuid().ToString();
+        }
 
-        public DateTime CreatedAtUtc { get { return new DateTime(_createdTicks, DateTimeKind.Utc); } set { _createdTicks = value.ToUniversalTime().Ticks; } }
+        public string LocationName
+        {
+            get => _locationName;
+            set => _locationName = value ?? string.Empty;
+        }
 
-        public void AssignHero(string heroId)
+        // إرجاع نسخة للقائمة لحماية الحالة الداخلية
+        public IReadOnlyList<string> AssignedHeroIds => _assignedHeroIds.AsReadOnly();
+
+        public DateTime CreatedAtUtc
+        {
+            get => _createdAtUtcTicks;
+            set => _createdAtUtcTicks = value.ToUniversalTime();
+        }
+
+        public void AddMemberById(string heroId)
         {
             if (string.IsNullOrEmpty(heroId)) return;
-            lock (_lock) { if (!_assignedHeroIds.Contains(heroId)) _assignedHeroIds.Add(heroId); }
+            if (!_assignedHeroIds.Contains(heroId)) _assignedHeroIds.Add(heroId);
         }
 
-        public bool RemoveHero(string heroId)
+        public void RemoveMemberById(string heroId)
         {
-            if (string.IsNullOrEmpty(heroId)) return false;
-            lock (_lock) { return _assignedHeroIds.Remove(heroId); }
+            if (string.IsNullOrEmpty(heroId)) return;
+            _assignedHeroIds.Remove(heroId);
         }
 
-        public override string ToString()
-        {
-            lock (_lock) return $"Camp[{CampId}] @ {LocationId} - {AssignedHeroIds.Count} heroes";
-        }
+        public override string ToString() =>
+            $"WarCamp[{CampId}] at {LocationName} Members:{_assignedHeroIds.Count}";
     }
 }
