@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -12,6 +13,9 @@ using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Core.State;
 using WarCouncilModern.DevTools;
 using WarCouncilModern.Models.Persistence;
+using WarCouncilModern.UI;
+using WarCouncilModern.UI.Interfaces;
+using WarCouncilModern.UI.Services;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
 using WarCouncilModern.Save;
@@ -27,6 +31,8 @@ namespace WarCouncilModern.Initialization
         internal static IWarDecisionService WarDecisionService { get; private set; }
         internal static IGameApi GameApi { get; private set; }
         internal static DevCouncilPanel DevPanel { get; private set; }
+        internal static IUiInvoker UiInvoker { get; private set; }
+        internal static ICouncilUiService CouncilUiService { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -75,6 +81,9 @@ namespace WarCouncilModern.Initialization
 
                 CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
                 WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
+
+                UiInvoker = new UiInvoker(SynchronizationContext.Current);
+                CouncilUiService = new CouncilUiService(UiInvoker);
 
                 DevPanel = new DevCouncilPanel(CouncilService, WarDecisionService, Logger);
             }
