@@ -32,5 +32,20 @@ namespace WarCouncilModern.Utilities
             var kingdom = Kingdom.All.FirstOrDefault(k => k.StringId == kingdomId);
             return kingdom?.Leader;
         }
+
+        public IFaction FindFactionById(string factionId)
+        {
+            return FactionManager.GetFaction(factionId);
+        }
+
+        public Kingdom FindKingdomByStringId(string kingdomId)
+        {
+            return Kingdom.All.FirstOrDefault(k => k.StringId == kingdomId);
+        }
+
+        public void ChangeRelationBetween(IFaction faction1, IFaction faction2, int relationDelta)
+        {
+            faction1.SetRelation(faction2, faction1.GetRelation(faction2) + relationDelta);
+        }
     }
 }
