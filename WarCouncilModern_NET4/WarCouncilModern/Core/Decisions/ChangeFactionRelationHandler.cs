@@ -18,29 +18,34 @@ namespace WarCouncilModern.Core.Decisions
 
         public bool Execute(WarDecision decision, WarCouncil council)
         {
-            if (string.IsNullOrEmpty(decision.ExecutionPayload?.TargetFactionId))
+            var payload = decision.ExecutionPayload;
+            var councilId = council.SaveId;
+            var decisionId = decision.DecisionId;
+            var proposerId = decision.ProposedByHeroId;
+
+            if (payload == null || string.IsNullOrEmpty(payload.TargetFactionId))
             {
-                _logger.Warn($"[ChangeFactionRelationHandler] decisionId={decision.DecisionId} missing TargetFactionId in payload.");
+                _logger.Warn($"[ChangeFactionRelationHandler] councilId={councilId} decisionId={decisionId} proposerId={proposerId} Execution failed: Missing or invalid payload.");
                 return false;
             }
 
-            var targetFactionId = decision.ExecutionPayload.TargetFactionId;
+            var targetFactionId = payload.TargetFactionId;
             var targetFaction = _gameApi.FindFactionById(targetFactionId);
             if (targetFaction == null)
             {
-                _logger.Warn($"[ChangeFactionRelationHandler] decisionId={decision.DecisionId} could not find target faction with id={targetFactionId}.");
+                _logger.Warn($"[ChangeFactionRelationHandler] councilId={councilId} decisionId={decisionId} proposerId={proposerId} Execution failed: Target faction not found (targetFactionId='{targetFactionId}').");
                 return false;
             }
 
             var sourceKingdom = _gameApi.FindKingdomByStringId(council.KingdomStringId);
             if (sourceKingdom == null)
             {
-                _logger.Warn($"[ChangeFactionRelationHandler] councilId={council.SaveId} could not find source kingdom.");
+                _logger.Warn($"[ChangeFactionRelationHandler] councilId={councilId} decisionId={decisionId} proposerId={proposerId} Execution failed: Source kingdom not found.");
                 return false;
             }
 
             _gameApi.ChangeRelationBetween(sourceKingdom, targetFaction, _relationDelta);
-            _logger.Info($"[ChangeFactionRelationHandler] decisionId={decision.DecisionId} applied relation change of {_relationDelta} between {sourceKingdom.StringId} and {targetFactionId}.");
+            _logger.Info($"[ChangeFactionRelationHandler] councilId={councilId} decisionId={decisionId} proposerId={proposerId} Execution success. Payload: {{ targetFactionId='{targetFactionId}', relationDelta={_relationDelta} }}. Applied relation change between {sourceKingdom.StringId} and {targetFactionId}.");
             return true;
         }
     }
