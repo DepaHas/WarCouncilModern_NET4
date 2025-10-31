@@ -19,7 +19,7 @@ namespace WarCouncilModern.Core.Manager
     public interface IWarCouncilManager
     {
         IReadOnlyList<WarCouncil> Councils { get; }
-        WarCouncil CreateCouncil(string name, string factionId, string location = "");
+        WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
         WarCouncil GetCouncilById(Guid saveId);
         WarCouncil GetCouncilByFaction(string factionId);       
         bool RemoveCouncil(Guid saveId);
@@ -90,11 +90,18 @@ namespace WarCouncilModern.Core.Manager
         /// <summary>
         /// Creates a new War Council for the specified faction.
         /// </summary>
-        public WarCouncil CreateCouncil(string kingdomId, string structure = "", string leaderHeroId = "")
+        public WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "")
         {
             if (string.IsNullOrWhiteSpace(kingdomId)) throw new ArgumentException("kingdomId is required", nameof(kingdomId));
 
-            var council = new WarCouncil(kingdomId, CouncilStructure.Undefined);
+            var council = new WarCouncil(kingdomId, CouncilStructure.Undefined)
+            {
+                Name = name
+            };
+            if (!string.IsNullOrEmpty(leaderHeroId))
+            {
+                council.AssignLeaderByHeroId(leaderHeroId);
+            }
             lock (_locker) _councils.Add(council);
 
             _logger.Info($"[WarCouncilManager] Created council for kingdom '{kingdomId}'.");
@@ -115,7 +122,7 @@ namespace WarCouncilModern.Core.Manager
         /// </summary>
         public WarCouncil GetCouncilById(Guid id)
         {
-            lock (_locker) return _councils.FirstOrDefault(c => c.KingdomStringId == id.ToString());
+            lock (_locker) return _councils.FirstOrDefault(c => c.SaveId == id.ToString());
         }
 
         /// <summary>
@@ -135,7 +142,7 @@ namespace WarCouncilModern.Core.Manager
             WarCouncil removed = null;
             lock (_locker)
             {
-                var c = _councils.FirstOrDefault(x => x.KingdomStringId == id.ToString());
+                var c = _councils.FirstOrDefault(x => x.SaveId == id.ToString());
                 if (c == null) return false;
                 _councils.Remove(c);
                 removed = c;

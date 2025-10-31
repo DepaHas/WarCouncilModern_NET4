@@ -16,12 +16,14 @@ namespace WarCouncilModern.Models.Entities
         [SaveableField(6)] private List<WarDecision> _decisions;
         [SaveableField(7)] private List<WarReport> _reports;
         [SaveableField(8)] private long _createdTicks;
+        [SaveableField(9)] private string _name;
 
         private readonly object _lock = new object();
 
         public WarCouncil()
         {
             _saveId = Guid.NewGuid().ToString();
+            _name = "Default Council";
             _kingdomStringId = string.Empty;
             _structure = CouncilStructure.Undefined;
             _leaderHeroId = string.Empty;
@@ -44,7 +46,9 @@ namespace WarCouncilModern.Models.Entities
         public IReadOnlyList<string> MemberHeroIds { get { lock (_lock) return _memberHeroIds.ToArray(); } }
         public IReadOnlyList<WarDecision> Decisions { get { lock (_lock) return _decisions.ToArray(); } }
         public IReadOnlyList<WarReport> Reports { get { lock (_lock) return _reports.ToArray(); } }
-        public DateTime CreatedAtUtc { get { return new DateTime(_createdTicks, DateTimeKind.Utc); } set { _createdTicks = value.ToUniversalTime().Ticks; } }
+        public DateTime CreatedAt { get { return new DateTime(_createdTicks, DateTimeKind.Utc); } set { _createdTicks = value.ToUniversalTime().Ticks; } }
+
+        public string Name { get { lock (_lock) return _name; } set { lock (_lock) _name = value ?? "Default Council"; } }
 
         public void AssignLeaderByHeroId(string heroStringId)
         {
