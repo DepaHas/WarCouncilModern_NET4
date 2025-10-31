@@ -1,15 +1,25 @@
 ﻿using System;
 using System.Reflection;
+using TaleWorlds.CampaignSystem;
+using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
+using WarCouncilModern.Core.Init;
+using WarCouncilModern.Core.Manager;
+using WarCouncilModern.Core.Services;
+using WarCouncilModern.Core.Settings;
+using WarCouncilModern.Core.State;
+using WarCouncilModern.Models.Persistence;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
 using WarCouncilModern.Save;
+using WarCouncilModern.CouncilSystem.Behaviors;
 
 namespace WarCouncilModern.Initialization
 {
     public class SubModule : MBSubModuleBase
     {
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
+        internal static IWarCouncilManager WarCouncilManager { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -24,6 +34,30 @@ namespace WarCouncilModern.Initialization
             catch (Exception ex)
             {
                 try { Logger.Error("SubModule.OnSubModuleLoad exception", ex); } catch { }
+            }
+        }
+
+        protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
+        {
+            base.OnGameStart(game, gameStarterObject);
+
+            if (game.GameType is Campaign)
+            {
+                var initializer = new ModuleInitializer();
+                initializer.Initialize(
+                    new FeatureRegistry(),
+                    Logger,
+                    new ModStateTracker(Logger),
+                    new StubPersistenceAdapter(),
+                    new CouncilMeetingService(Logger),
+                    new DecisionProcessingService(Logger),
+                    new AdvisorService(Logger),
+                    new StubModSettings()
+                );
+                WarCouncilManager = initializer.Manager;
+
+                var gameStarter = (CampaignGameStarter)gameStarterObject;
+                gameStarter.AddBehavior(new WarCouncilCampaignBehavior());
             }
         }
 
