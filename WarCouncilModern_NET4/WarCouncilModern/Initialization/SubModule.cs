@@ -10,6 +10,7 @@ using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Core.State;
+using WarCouncilModern.DevTools;
 using WarCouncilModern.Models.Persistence;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
@@ -25,6 +26,7 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilService CouncilService { get; private set; }
         internal static IWarDecisionService WarDecisionService { get; private set; }
         internal static IGameApi GameApi { get; private set; }
+        internal static DevCouncilPanel DevPanel { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -69,10 +71,12 @@ namespace WarCouncilModern.Initialization
 
                 GameApi = new GameApi();
                 var memberSelector = new DefaultCouncilMemberSelector(GameApi, Logger);
-                var executionHandler = new LogExecutionHandler(Logger);
+                var executionHandler = new ChangeFactionRelationHandler(GameApi, Logger);
 
                 CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
                 WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
+
+                DevPanel = new DevCouncilPanel(CouncilService, WarDecisionService, Logger);
             }
         }
 

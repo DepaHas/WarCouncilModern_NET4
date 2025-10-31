@@ -15,6 +15,7 @@ namespace WarCouncilModern.Models.Entities
         [SaveableField(5)] private string _proposedByHeroId;
         [SaveableField(6)] private long _proposedTicks;
         [SaveableField(7)] private Dictionary<string, bool> _votes = new Dictionary<string, bool>();
+        [SaveableField(8)] public DecisionExecutionPayload ExecutionPayload { get; set; }
 
         public WarDecision()
         {
