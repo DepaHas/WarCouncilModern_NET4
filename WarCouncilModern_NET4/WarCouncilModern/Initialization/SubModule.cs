@@ -43,21 +43,23 @@ namespace WarCouncilModern.Initialization
 
             if (game.GameType is Campaign)
             {
+                var gameStarter = (CampaignGameStarter)gameStarterObject;
+                var behavior = new WarCouncilCampaignBehavior();
+                gameStarter.AddBehavior(behavior);
+
+                var settings = new StubModSettings();
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
-                    new FeatureRegistry(),
+                    behavior,
+                    new FeatureRegistry(settings),
                     Logger,
                     new ModStateTracker(Logger),
-                    new StubPersistenceAdapter(),
                     new CouncilMeetingService(Logger),
                     new DecisionProcessingService(Logger),
                     new AdvisorService(Logger),
                     new StubModSettings()
                 );
                 WarCouncilManager = initializer.Manager;
-
-                var gameStarter = (CampaignGameStarter)gameStarterObject;
-                gameStarter.AddBehavior(new WarCouncilCampaignBehavior());
             }
         }
 

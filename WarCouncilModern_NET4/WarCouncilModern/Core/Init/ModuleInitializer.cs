@@ -21,7 +21,7 @@ namespace WarCouncilModern.Core.Init
         private IFeatureRegistry? _featureRegistry;
         private IModLogger _logger;
         private IModStateTracker? _stateTracker;
-        private IPersistenceAdapter? _persistence;
+        private WarCouncilCampaignBehavior? _behavior;
         private ICouncilMeetingService? _meetingService;
         private IDecisionProcessingService? _decisionService;
         private IAdvisorService? _advisorService;
@@ -39,20 +39,20 @@ namespace WarCouncilModern.Core.Init
         /// استخدم هذا الأسلوب من SubModule أو من مكان تهيئة أعلى.
         /// </summary>
         public void Initialize(
+            WarCouncilCampaignBehavior behavior,
             IFeatureRegistry featureRegistry,
             IModLogger? logger,
             IModStateTracker stateTracker,
-            IPersistenceAdapter persistence,
             ICouncilMeetingService meetingService,
             IDecisionProcessingService decisionService,
             IAdvisorService? advisorService,
             IModSettings? settings
         )
         {
+            _behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
             _logger = logger ?? _logger;
             _stateTracker = stateTracker ?? throw new ArgumentNullException(nameof(stateTracker));
-            _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
             _meetingService = meetingService ?? throw new ArgumentNullException(nameof(meetingService));
             _decisionService = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
             _advisor_service_fix(advisorService);
@@ -80,12 +80,12 @@ namespace WarCouncilModern.Core.Init
             {
                 // مرّر positional لتجنّب مشكلة named-argument mismatch
                 _manager = new WarCouncilManager(
+                    _behavior!,
                     _meetingService!,
                     _decisionService!,
                     _advisorService!,
                     _settings,
                     _logger,
-                    _persistence!,
                     _stateTracker!,
                     _featureRegistry!
                 );

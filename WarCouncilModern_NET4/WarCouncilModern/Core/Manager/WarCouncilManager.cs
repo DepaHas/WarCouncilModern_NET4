@@ -20,8 +20,8 @@ namespace WarCouncilModern.Core.Manager
     {
         IReadOnlyList<WarCouncil> Councils { get; }
         WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
-        WarCouncil GetCouncilById(Guid saveId);
-        WarCouncil GetCouncilByFaction(string factionId);       
+        WarCouncil? GetCouncilById(Guid saveId);
+        WarCouncil? GetCouncilByFaction(string factionId);
         bool RemoveCouncil(Guid saveId);
         bool AddMemberToCouncil(Guid councilId, WarHero hero);
         bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId);
@@ -38,7 +38,7 @@ namespace WarCouncilModern.Core.Manager
     /// </summary>
     public class WarCouncilManager : IWarCouncilManager
     {
-        private readonly List<WarCouncil> _councils = new List<WarCouncil>();
+        private readonly WarCouncilCampaignBehavior _behavior;
         private readonly object _locker = new object();
 
         private readonly ICouncilMeetingService _meetingService;
@@ -54,7 +54,7 @@ namespace WarCouncilModern.Core.Manager
         {
             get
             {
-                lock (_locker) return _councils.ToList().AsReadOnly();
+                lock (_locker) return _behavior.Councils.Values.ToList().AsReadOnly();
             }
         }
 
@@ -66,21 +66,21 @@ namespace WarCouncilModern.Core.Manager
         /// Constructor with required dependencies injected.
         /// </summary>
         public WarCouncilManager(
+            WarCouncilCampaignBehavior behavior,
             ICouncilMeetingService meetingService,
             IDecisionProcessingService decisionService,
             IAdvisorService advisorService,
             IModSettings settings,
             IModLogger logger,
-            IPersistenceAdapter persistence,
             IModStateTracker stateTracker,
             IFeatureRegistry featureRegistry)
         {
+            _behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
             _meetingService = meetingService ?? throw new ArgumentNullException(nameof(meetingService));
             _decisionService = decisionService ?? throw new ArgumentNullException(nameof(decisionService));
             _advisorService = advisorService ?? throw new ArgumentNullException(nameof(advisorService));
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
             _stateTracker = stateTracker ?? throw new ArgumentNullException(nameof(stateTracker));
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
         }
@@ -102,7 +102,7 @@ namespace WarCouncilModern.Core.Manager
             {
                 council.AssignLeaderByHeroId(leaderHeroId);
             }
-            lock (_locker) _councils.Add(council);
+            lock (_locker) _behavior.AddCouncil(council);
 
             _logger.Info($"[WarCouncilManager] Created council for kingdom '{kingdomId}'.");
             _stateTracker.RecordEvent("CouncilCreated", Guid.Empty, new { kingdomId });
@@ -120,18 +120,18 @@ namespace WarCouncilModern.Core.Manager
         /// <summary>
         /// Returns council by SaveId or null.
         /// </summary>
-        public WarCouncil GetCouncilById(Guid id)
+        public WarCouncil? GetCouncilById(Guid id)
         {
-            lock (_locker) return _councils.FirstOrDefault(c => c.SaveId == id.ToString());
+            lock (_locker) return _behavior.GetCouncilById(id.ToString());
         }
 
         /// <summary>
         /// Returns the first council matching the factionId or null.
         /// </summary>
-        public WarCouncil GetCouncilByFaction(string kingdomId)
+        public WarCouncil? GetCouncilByFaction(string kingdomId)
         {
             if (string.IsNullOrWhiteSpace(kingdomId)) return null;
-            lock (_locker) return _councils.FirstOrDefault(c => c.KingdomStringId == kingdomId);
+            lock (_locker) return _behavior.Councils.Values.FirstOrDefault(c => c.KingdomStringId == kingdomId);
         }
 
         /// <summary>
@@ -139,33 +139,23 @@ namespace WarCouncilModern.Core.Manager
         /// </summary>
         public bool RemoveCouncil(Guid id)
         {
-            WarCouncil removed = null;
+            var council = GetCouncilById(id);
+            if (council == null) return false;
+
+            var removed = false;
             lock (_locker)
             {
-                var c = _councils.FirstOrDefault(x => x.SaveId == id.ToString());
-                if (c == null) return false;
-                _councils.Remove(c);
-                removed = c;
+                removed = _behavior.RemoveCouncil(id.ToString());
             }
 
-            if (removed != null)
+            if (removed)
             {
-                _logger.Info($"[WarCouncilManager] Removed council for kingdom '{removed.KingdomStringId}'.");
-                _stateTracker.RecordEvent("CouncilRemoved", Guid.Empty, new { removed.KingdomStringId });
-                CouncilRemoved?.Invoke(removed);
+                _logger.Info($"[WarCouncilManager] Removed council for kingdom '{council.KingdomStringId}'.");
+                _stateTracker.RecordEvent("CouncilRemoved", Guid.Empty, new { council.KingdomStringId });
+                CouncilRemoved?.Invoke(council);
             }
 
-            return true;
-        }
-
-        /// <summary>
-        /// Clears all councils (use carefully).
-        /// </summary>
-        public void ClearAll()
-        {
-            lock (_locker) _councils.Clear();
-            _logger.Info("[WarCouncilManager] Cleared all councils.");
-            _stateTracker.RecordEvent("AllCouncilsCleared", Guid.Empty, null);
+            return removed;
         }
 
         #endregion
@@ -251,7 +241,7 @@ namespace WarCouncilModern.Core.Manager
 
             try
             {
-                var autoSchedule = _featureRegistry.IsEnabled("AutoScheduleMeetingOnProposal");
+                var autoSchedule = _featureRegistry.IsEnabled(FeatureKeys.AutoScheduleMeetingOnProposal);
                 if (autoSchedule)
                 {
                     _meetingService.ScheduleMeetingForDecision(c, decision);
@@ -265,7 +255,7 @@ namespace WarCouncilModern.Core.Manager
 
             DecisionProposed?.Invoke(c, decision);
 
-            var autoProcess = _featureRegistry.IsEnabled("AutoDecisionProcessing");
+            var autoProcess = _featureRegistry.IsEnabled(FeatureKeys.AutoDecisionProcessing);
             if (autoProcess)
             {
                 // run async fire-and-forget but capture errors
@@ -302,50 +292,6 @@ namespace WarCouncilModern.Core.Manager
                 d.Description = "Error";
                 _stateTracker.RecordEvent("DecisionProcessError", Guid.Empty, new { ex.Message });
                 return false;
-            }
-        }
-
-        #endregion
-
-        #region Persistence helpers
-
-        /// <summary>
-        /// Exports all councils via the persistence adapter.
-        /// </summary>
-        public void ExportAllForSave()
-        {
-            try
-            {
-                lock (_locker) _persistence.ExportCouncils(_councils);
-                _logger.Info("[WarCouncilManager] Exported councils for save.");
-                _stateTracker.RecordEvent("ExportedForSave", Guid.Empty, new { Count = _councils.Count });
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"ExportAllForSave failed: {ex}", ex);
-            }
-        }
-
-        /// <summary>
-        /// Imports councils from persistence adapter, replacing in-memory state.
-        /// </summary>
-        public void ImportFromSave()
-        {
-            try
-            {
-                var imported = _persistence.ImportCouncils()?.ToList() ?? new List<WarCouncil>();
-                lock (_locker)
-                {
-                    _councils.Clear();
-                    _councils.AddRange(imported);
-                }
-
-                _logger.Info($"Imported {_councils.Count} councils from save.");
-                _stateTracker.RecordEvent("ImportedFromSave", Guid.Empty, new { Count = _councils.Count });
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"ImportFromSave failed: {ex}", ex);
             }
         }
 

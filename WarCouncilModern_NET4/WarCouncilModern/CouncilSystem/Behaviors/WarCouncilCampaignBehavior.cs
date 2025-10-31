@@ -1,43 +1,46 @@
+using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
-using WarCouncilModern.Core.Manager;
-using WarCouncilModern.Initialization;
+using WarCouncilModern.Models.Entities;
+using TaleWorlds.SaveSystem;
 
 namespace WarCouncilModern.CouncilSystem.Behaviors
 {
     public class WarCouncilCampaignBehavior : CampaignBehaviorBase
     {
-        private readonly IWarCouncilManager _warCouncilManager;
+        [SaveableField(1)]
+        private Dictionary<string, WarCouncil> _councils = new Dictionary<string, WarCouncil>();
 
-        public WarCouncilCampaignBehavior()
-        {
-            // This is a temporary solution for dependency injection.
-            // A proper DI framework should be used in the future.
-            _warCouncilManager = SubModule.WarCouncilManager;
-        }
+        public Dictionary<string, WarCouncil> Councils => _councils;
 
         public override void RegisterEvents()
         {
-            CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
-            CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
+            // No longer needed to listen to game loaded event
         }
 
         public override void SyncData(IDataStore dataStore)
         {
-            if (dataStore.IsSaving)
+            dataStore.SyncData("_councils", ref _councils);
+        }
+
+        public override string Id => "WarCouncilCampaignBehavior";
+
+        public void AddCouncil(WarCouncil council)
+        {
+            if (!_councils.ContainsKey(council.SaveId))
             {
-                _warCouncilManager.ExportAllForSave();
+                _councils.Add(council.SaveId, council);
             }
         }
 
-        private void OnGameLoaded(CampaignGameStarter gameStarter)
+        public WarCouncil GetCouncilById(string saveId)
         {
-            _warCouncilManager.ImportFromSave();
+            _councils.TryGetValue(saveId, out var council);
+            return council;
         }
 
-        private void OnSessionLaunched(CampaignGameStarter gameStarter)
+        public bool RemoveCouncil(string saveId)
         {
-            // This is where we would add the behavior to the game starter.
-            // We will do this in SubModule.cs
+            return _councils.Remove(saveId);
         }
     }
 }
