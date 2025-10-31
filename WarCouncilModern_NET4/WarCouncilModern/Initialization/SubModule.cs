@@ -20,6 +20,7 @@ namespace WarCouncilModern.Initialization
     {
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
         internal static IWarCouncilManager WarCouncilManager { get; private set; }
+        internal static ICouncilService CouncilService { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -60,6 +61,7 @@ namespace WarCouncilModern.Initialization
                     new StubModSettings()
                 );
                 WarCouncilManager = initializer.Manager;
+                CouncilService = new CouncilService(WarCouncilManager, Logger);
             }
         }
 

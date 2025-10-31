@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TaleWorlds.CampaignSystem;
+using WarCouncilModern.Initialization;
 using WarCouncilModern.Models.Entities;
 using TaleWorlds.SaveSystem;
 
@@ -14,7 +15,15 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
 
         public override void RegisterEvents()
         {
-            // No longer needed to listen to game loaded event
+            CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
+        }
+
+        private void OnGameLoaded(CampaignGameStarter gameStarter)
+        {
+            if (SubModule.CouncilService != null && Kingdom.PlayerKingdom != null)
+            {
+                SubModule.CouncilService.StartCouncilForKingdom(Kingdom.PlayerKingdom);
+            }
         }
 
         public override void SyncData(IDataStore dataStore)
