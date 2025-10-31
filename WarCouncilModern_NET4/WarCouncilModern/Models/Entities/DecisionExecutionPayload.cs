@@ -6,5 +6,8 @@ namespace WarCouncilModern.Models.Entities
     {
         [SaveableField(1)]
         public string TargetFactionId { get; set; }
+
+        [SaveableField(2)]
+        public string RawPayload { get; set; }
     }
 }

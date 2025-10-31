@@ -11,7 +11,9 @@ namespace WarCouncilModern.UI.Services
     {
         ObservableCollection<WarCouncilDto> AllCouncils { get; }
         bool IsLoading { get; }
+        bool IsProposing { get; }
 
         Task InitializeAsync(CancellationToken cancellationToken = default);
+        Task ProposeDecisionAsync(Guid councilId, string title, string description, string payload, CancellationToken cancellationToken = default);
     }
 }

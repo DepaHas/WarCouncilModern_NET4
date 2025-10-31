@@ -85,9 +85,9 @@ namespace WarCouncilModern.Initialization
 
                 var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 UiInvoker = new UiInvoker(uiScheduler);
-                CouncilUiService = new CouncilUiService(WarCouncilManager, UiInvoker, Logger);
+                CouncilUiService = new CouncilUiService(WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
-                DevPanel = new DevCouncilPanel(CouncilService, WarDecisionService, Logger);
+                DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, WarDecisionService, Logger);
             }
         }
 
