@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
+using WarCouncilModern.Core.Council;
 using WarCouncilModern.Core.Events;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Models;
@@ -12,11 +13,13 @@ namespace WarCouncilModern.Core.Services
     public class CouncilService : ICouncilService
     {
         private readonly IWarCouncilManager _warCouncilManager;
+        private readonly ICouncilMemberSelector _memberSelector;
         private readonly IModLogger _logger;
 
-        public CouncilService(IWarCouncilManager warCouncilManager, IModLogger logger)
+        public CouncilService(IWarCouncilManager warCouncilManager, ICouncilMemberSelector memberSelector, IModLogger logger)
         {
             _warCouncilManager = warCouncilManager ?? throw new ArgumentNullException(nameof(warCouncilManager));
+            _memberSelector = memberSelector ?? throw new ArgumentNullException(nameof(memberSelector));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -31,7 +34,7 @@ namespace WarCouncilModern.Core.Services
             var existingCouncil = _warCouncilManager.GetCouncilByFaction(kingdom.StringId);
             if (existingCouncil != null)
             {
-                _logger.Info($"[CouncilService] Council for kingdom '{kingdom.Name}' already exists. Returning existing council.");
+                _logger.Info($"[CouncilService] councilId={existingCouncil.SaveId} kingdom='{kingdom.Name}' already exists.");
                 return existingCouncil;
             }
 
@@ -44,17 +47,11 @@ namespace WarCouncilModern.Core.Services
                 return null;
             }
 
-            // Add leader and clan leaders as initial members
-            var membersToAdd = kingdom.Clans.Where(c => c.Leader != null).Select(c => c.Leader).ToList();
-            if (kingdom.Leader != null && !membersToAdd.Contains(kingdom.Leader))
+            var memberIds = _memberSelector.GetMembersForCouncil(kingdom.StringId, new CouncilContext { Reason = "InitialCreation" });
+            _logger.Info($"[CouncilService] councilId={newCouncil.SaveId} Adding {memberIds.Count()} members.");
+            foreach (var memberId in memberIds)
             {
-                membersToAdd.Add(kingdom.Leader);
-            }
-
-            _logger.Info($"[CouncilService] Adding {membersToAdd.Count} members to the council.");
-            foreach (var hero in membersToAdd)
-            {
-                var warHero = new WarHero(hero.StringId, hero.Name.ToString());
+                var warHero = new WarHero(memberId, "Unknown"); // Name will be resolved later if needed
                 _warCouncilManager.AddMemberToCouncil(new Guid(newCouncil.SaveId), warHero);
             }
 

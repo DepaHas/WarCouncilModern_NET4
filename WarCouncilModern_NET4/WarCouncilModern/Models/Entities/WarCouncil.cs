@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.SaveSystem;
+using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.Models.Entities
 {
@@ -117,6 +118,22 @@ namespace WarCouncilModern.Models.Entities
         public bool IsValid()
         {
             lock (_lock) return !string.IsNullOrEmpty(_kingdomStringId);
+        }
+
+        public void RebuildMembers(IGameApi gameApi)
+        {
+            lock (_lock)
+            {
+                var validMembers = new List<string>();
+                foreach (var memberId in _memberHeroIds)
+                {
+                    if (gameApi.FindHeroByStringId(memberId) != null)
+                    {
+                        validMembers.Add(memberId);
+                    }
+                }
+                _memberHeroIds = validMembers;
+            }
         }
 
         public override string ToString()

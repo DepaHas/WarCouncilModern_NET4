@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.SaveSystem;
+using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.Models.Entities
 {
@@ -55,6 +56,20 @@ namespace WarCouncilModern.Models.Entities
 
         public int GetYeaVotes() => _votes.Count(v => v.Value);
         public int GetNayVotes() => _votes.Count(v => !v.Value);
+
+        public void RehydrateVotes(IGameApi gameApi)
+        {
+            // This is mainly for validation in case hero IDs become invalid
+            var validVotes = new Dictionary<string, bool>();
+            foreach (var vote in _votes)
+            {
+                if (gameApi.FindHeroByStringId(vote.Key) != null)
+                {
+                    validVotes[vote.Key] = vote.Value;
+                }
+            }
+            _votes = validVotes;
+        }
 
         public override string ToString() => $"Decision[{DecisionId}]: {Title} ({Status})";
     }

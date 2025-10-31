@@ -1,6 +1,7 @@
 using System;
 using TaleWorlds.CampaignSystem;
 using WarCouncilModern.Core.Events;
+using WarCouncilModern.Core.Decisions;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.State;
 using WarCouncilModern.Models.Entities;
@@ -12,12 +13,14 @@ namespace WarCouncilModern.Core.Services
     {
         private readonly IWarCouncilManager _warCouncilManager;
         private readonly IFeatureRegistry _featureRegistry;
+        private readonly IExecutionHandler _executionHandler;
         private readonly IModLogger _logger;
 
-        public WarDecisionService(IWarCouncilManager warCouncilManager, IFeatureRegistry featureRegistry, IModLogger logger)
+        public WarDecisionService(IWarCouncilManager warCouncilManager, IFeatureRegistry featureRegistry, IExecutionHandler executionHandler, IModLogger logger)
         {
             _warCouncilManager = warCouncilManager ?? throw new ArgumentNullException(nameof(warCouncilManager));
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
+            _executionHandler = executionHandler ?? throw new ArgumentNullException(nameof(executionHandler));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -34,11 +37,11 @@ namespace WarCouncilModern.Core.Services
             if (decision != null)
             {
                 CouncilEvents.RaiseDecisionProposed(council, decision);
-                _logger.Info($"[WarDecisionService] Decision '{title}' proposed in council for {council.KingdomStringId}.");
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} title='{title}' proposed by heroId={proposer.StringId}.");
             }
             else
             {
-                _logger.Error($"[WarDecisionService] Failed to propose decision '{title}' in council for {council.KingdomStringId}.");
+                _logger.Error($"[WarDecisionService] councilId={council.SaveId} Failed to propose decision '{title}'.");
             }
 
             return decision;
@@ -53,7 +56,7 @@ namespace WarCouncilModern.Core.Services
             }
 
             decision.RecordVote(voter.StringId, vote);
-            _logger.Info($"[WarDecisionService] Vote recorded for '{voter.Name}' on decision '{decision.Title}'. Vote: {(vote ? "Yea" : "Nay")}");
+            _logger.Info($"[WarDecisionService] councilId={decision.DecisionId} voter={voter.StringId} vote={(vote ? "Yea" : "Nay")}.");
         }
 
         public void ProcessDecision(WarCouncil council, WarDecision decision)
@@ -66,7 +69,7 @@ namespace WarCouncilModern.Core.Services
 
             if (_featureRegistry.IsEnabled(FeatureKeys.AutoDecisionProcessing))
             {
-                _logger.Info($"[WarDecisionService] Auto-processing decision '{decision.Title}' due to feature flag.");
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} Auto-processing due to feature flag.");
                 ExecuteDecision(council, decision);
                 return;
             }
@@ -77,7 +80,7 @@ namespace WarCouncilModern.Core.Services
             if (yeaVotes > nayVotes)
             {
                 decision.Status = "Approved";
-                _logger.Info($"[WarDecisionService] Decision '{decision.Title}' was approved with {yeaVotes} to {nayVotes}.");
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} was approved with {yeaVotes} to {nayVotes}.");
 
                 // Placeholder for execution logic
                 ExecuteDecision(council, decision);
@@ -85,17 +88,23 @@ namespace WarCouncilModern.Core.Services
             else
             {
                 decision.Status = "Rejected";
-                _logger.Info($"[WarDecisionService] Decision '{decision.Title}' was rejected with {yeaVotes} to {nayVotes}.");
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} was rejected with {yeaVotes} to {nayVotes}.");
             }
         }
 
         private void ExecuteDecision(WarCouncil council, WarDecision decision)
         {
-            // This is a placeholder for where the actual game-changing logic would go.
-            // For now, we'll just update the status and raise an event.
-            decision.Status = "Executed";
-            CouncilEvents.RaiseDecisionExecuted(council, decision);
-            _logger.Info($"[WarDecisionService] Decision '{decision.Title}' has been executed for council {council.KingdomStringId}.");
+            if (_executionHandler.Execute(decision, council))
+            {
+                decision.Status = "Executed";
+                CouncilEvents.RaiseDecisionExecuted(council, decision);
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} has been executed.");
+            }
+            else
+            {
+                decision.Status = "ExecutionFailed";
+                _logger.Warn($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} execution failed.");
+            }
         }
     }
 }
