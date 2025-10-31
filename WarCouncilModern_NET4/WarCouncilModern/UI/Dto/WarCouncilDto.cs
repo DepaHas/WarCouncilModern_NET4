@@ -1,10 +1,10 @@
 using System;
 
-namespace WarCouncilModern.UI.DTOs
+namespace WarCouncilModern.UI.Dto
 {
-    public class WarCouncilDTO
+    public class WarCouncilDto
     {
-        public string SaveId { get; set; }
+        public Guid SaveId { get; set; }
         public string KingdomId { get; set; }
         public string Title { get; set; }
         public string ShortDescription { get; set; }

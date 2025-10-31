@@ -1,10 +1,10 @@
 using System;
 
-namespace WarCouncilModern.UI.DTOs
+namespace WarCouncilModern.UI.Dto
 {
-    public class WarDecisionDTO
+    public class WarDecisionDto
     {
-        public string DecisionGuid { get; set; }
+        public Guid DecisionGuid { get; set; }
         public string Title { get; set; }
         public string Status { get; set; }
         public int YeaCount { get; set; }
