@@ -1,10 +1,17 @@
+using System;
 using System.Collections.ObjectModel;
-using WarCouncilModern.UI.DTOs;
+using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
+using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.Services
 {
-    public interface ICouncilUiService
+    public interface ICouncilUiService : IDisposable, INotifyPropertyChanged
     {
-        ReadOnlyObservableCollection<WarCouncilDTO> AllCouncils { get; }
+        ObservableCollection<WarCouncilDto> AllCouncils { get; }
+        bool IsLoading { get; }
+
+        Task InitializeAsync(CancellationToken cancellationToken = default);
     }
 }

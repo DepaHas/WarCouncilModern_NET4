@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -82,8 +83,9 @@ namespace WarCouncilModern.Initialization
                 CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
                 WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
 
-                UiInvoker = new UiInvoker(SynchronizationContext.Current);
-                CouncilUiService = new CouncilUiService(UiInvoker);
+                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                UiInvoker = new UiInvoker(uiScheduler);
+                CouncilUiService = new CouncilUiService(WarCouncilManager, UiInvoker, Logger);
 
                 DevPanel = new DevCouncilPanel(CouncilService, WarDecisionService, Logger);
             }

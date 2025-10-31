@@ -29,9 +29,6 @@ namespace WarCouncilModern.Core.Manager
         WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
         Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
         void RebuildReferencesAfterLoad(IGameApi gameApi);
-        event Action<WarCouncil, WarDecision> DecisionProposed;
-        event Action<WarCouncil> CouncilCreated;
-        event Action<WarCouncil> CouncilRemoved;
     }
 
     /// <summary>
@@ -59,10 +56,6 @@ namespace WarCouncilModern.Core.Manager
                 lock (_locker) return _behavior.Councils.Values.ToList().AsReadOnly();
             }
         }
-
-        public event Action<WarCouncil, WarDecision> DecisionProposed;
-        public event Action<WarCouncil> CouncilCreated;
-        public event Action<WarCouncil> CouncilRemoved;
 
         /// <summary>
         /// Constructor with required dependencies injected.
@@ -115,7 +108,7 @@ namespace WarCouncilModern.Core.Manager
                 catch (Exception ex) { _logger.Warn($"Advisor initialization failed: {ex.Message}"); }
             });
 
-            CouncilCreated?.Invoke(council);
+        CouncilEvents.RaiseCouncilCreated(council);
             return council;
         }
 
@@ -154,7 +147,7 @@ namespace WarCouncilModern.Core.Manager
             {
                 _logger.Info($"[WarCouncilManager] Removed council for kingdom '{council.KingdomStringId}'.");
                 _stateTracker.RecordEvent("CouncilRemoved", Guid.Empty, new { council.KingdomStringId });
-                CouncilRemoved?.Invoke(council);
+            CouncilEvents.RaiseCouncilEnded(council);
             }
 
             return removed;
@@ -255,7 +248,7 @@ namespace WarCouncilModern.Core.Manager
                 _logger.Warn($"Meeting scheduling failed: {ex.Message}");
             }
 
-            DecisionProposed?.Invoke(c, decision);
+    CouncilEvents.RaiseDecisionProposed(c, decision);
 
             var autoProcess = _featureRegistry.IsEnabled(FeatureKeys.AutoDecisionProcessing);
             if (autoProcess)
