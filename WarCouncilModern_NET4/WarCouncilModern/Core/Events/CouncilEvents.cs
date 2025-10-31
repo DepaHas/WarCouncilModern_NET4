@@ -8,14 +8,33 @@ namespace WarCouncilModern.Core.Events
     /// </summary>
     public static class CouncilEvents
     {
-        /// <summary>
-        /// Fired when a new council is created.
-        /// </summary>
+        // Council Lifecycle Events
         public static event Action<WarCouncil> OnCouncilCreated;
+        public static event Action<WarCouncil> OnCouncilEnded;
+
+        // Decision Lifecycle Events
+        public static event Action<WarCouncil, WarDecision> OnDecisionProposed;
+        public static event Action<WarCouncil, WarDecision> OnDecisionExecuted;
+
 
         internal static void RaiseCouncilCreated(WarCouncil council)
         {
             OnCouncilCreated?.Invoke(council);
+        }
+
+        internal static void RaiseCouncilEnded(WarCouncil council)
+        {
+            OnCouncilEnded?.Invoke(council);
+        }
+
+        internal static void RaiseDecisionProposed(WarCouncil council, WarDecision decision)
+        {
+            OnDecisionProposed?.Invoke(council, decision);
+        }
+
+        internal static void RaiseDecisionExecuted(WarCouncil council, WarDecision decision)
+        {
+            OnDecisionExecuted?.Invoke(council, decision);
         }
     }
 }

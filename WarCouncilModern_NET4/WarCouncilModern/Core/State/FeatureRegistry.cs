@@ -24,9 +24,9 @@ namespace WarCouncilModern.Core.State
 
         public bool IsEnabled(string featureName)
         {
-            // This is a placeholder for a real implementation that would check the settings.
-            // For now, we will consider all features enabled.
-            return true;
+            // Defaulting to false as per safety guidelines.
+            // A real implementation would check _settings.
+            return false;
         }
     }
 }

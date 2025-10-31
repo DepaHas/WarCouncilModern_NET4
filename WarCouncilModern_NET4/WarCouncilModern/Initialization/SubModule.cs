@@ -4,6 +4,8 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 using WarCouncilModern.Core.Init;
+using WarCouncilModern.Core.Council;
+using WarCouncilModern.Core.Decisions;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Core.Settings;
@@ -21,6 +23,8 @@ namespace WarCouncilModern.Initialization
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
         internal static IWarCouncilManager WarCouncilManager { get; private set; }
         internal static ICouncilService CouncilService { get; private set; }
+        internal static IWarDecisionService WarDecisionService { get; private set; }
+        internal static IGameApi GameApi { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -49,10 +53,11 @@ namespace WarCouncilModern.Initialization
                 gameStarter.AddBehavior(behavior);
 
                 var settings = new StubModSettings();
+                var featureRegistry = new FeatureRegistry(settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
                     behavior,
-                    new FeatureRegistry(settings),
+                    featureRegistry,
                     Logger,
                     new ModStateTracker(Logger),
                     new CouncilMeetingService(Logger),
@@ -61,7 +66,13 @@ namespace WarCouncilModern.Initialization
                     new StubModSettings()
                 );
                 WarCouncilManager = initializer.Manager;
-                CouncilService = new CouncilService(WarCouncilManager, Logger);
+
+                GameApi = new GameApi();
+                var memberSelector = new DefaultCouncilMemberSelector(GameApi, Logger);
+                var executionHandler = new LogExecutionHandler(Logger);
+
+                CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
+                WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
             }
         }
 

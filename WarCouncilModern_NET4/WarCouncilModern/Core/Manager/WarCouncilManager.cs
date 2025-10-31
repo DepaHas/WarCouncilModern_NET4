@@ -22,13 +22,15 @@ namespace WarCouncilModern.Core.Manager
         WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
         WarCouncil? GetCouncilById(Guid saveId);
         WarCouncil? GetCouncilByFaction(string factionId);
+        bool HasActiveCouncilForKingdom(string kingdomId);
         bool RemoveCouncil(Guid saveId);
         bool AddMemberToCouncil(Guid councilId, WarHero hero);
         bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId);
         WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
         Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
+        void RebuildReferencesAfterLoad(IGameApi gameApi);
         event Action<WarCouncil, WarDecision> DecisionProposed;
-        event Action<WarCouncil> CouncilCreated;    
+        event Action<WarCouncil> CouncilCreated;
         event Action<WarCouncil> CouncilRemoved;
     }
 
@@ -298,6 +300,30 @@ namespace WarCouncilModern.Core.Manager
         #endregion
 
         #region Utilities
+
+        public bool HasActiveCouncilForKingdom(string kingdomId)
+        {
+            lock (_locker)
+            {
+                return _behavior.Councils.Values.Any(c => c.KingdomStringId == kingdomId);
+            }
+        }
+
+        public void RebuildReferencesAfterLoad(IGameApi gameApi)
+        {
+            lock (_locker)
+            {
+                foreach (var council in _behavior.Councils.Values)
+                {
+                    council.RebuildMembers(gameApi);
+                    foreach (var decision in council.Decisions)
+                    {
+                        decision.RehydrateVotes(gameApi);
+                    }
+                }
+            }
+            _logger.Info("[WarCouncilManager] Rebuilt references after loading save.");
+        }
 
         private void SafeInvoke(Action action)
         {
