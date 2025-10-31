@@ -24,7 +24,7 @@ namespace WarCouncilModern.Core.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public WarDecision ProposeDecision(WarCouncil council, string title, string description, Hero proposer)
+        public WarDecision ProposeDecision(WarCouncil council, string title, string description, Hero proposer, string executionPayload = null)
         {
             if (council == null || proposer == null || string.IsNullOrWhiteSpace(title))
             {
@@ -33,11 +33,15 @@ namespace WarCouncilModern.Core.Services
             }
 
             var decision = _warCouncilManager.ProposeDecision(new Guid(council.SaveId), title, description, new Guid(proposer.StringId));
-
             if (decision != null)
             {
+                if (!string.IsNullOrWhiteSpace(executionPayload))
+                {
+                    decision.ExecutionPayload = new DecisionExecutionPayload { RawPayload = executionPayload };
+                }
+
                 CouncilEvents.RaiseDecisionProposed(council, decision);
-                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} title='{title}' proposed by heroId={proposer.StringId}.");
+                _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} title='{title}' proposed by heroId={proposer.StringId}. Payload attached: {!string.IsNullOrWhiteSpace(executionPayload)}");
             }
             else
             {
