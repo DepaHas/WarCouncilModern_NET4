@@ -319,6 +319,12 @@ namespace WarCouncilModern.Core.Manager
                     foreach (var decision in council.Decisions)
                     {
                         decision.RehydrateVotes(gameApi);
+
+                        // Reset in-progress decisions to a safe state after loading.
+                        if (decision.Status == "VotingOpen" || decision.Status == "Tallying")
+                        {
+                            decision.Status = "Proposed";
+                        }
                     }
                 }
             }

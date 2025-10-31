@@ -17,6 +17,8 @@ namespace WarCouncilModern.Models.Entities
         [SaveableField(7)] private Dictionary<string, bool> _votes = new Dictionary<string, bool>();
         [SaveableField(8)] public DecisionExecutionPayload ExecutionPayload { get; set; }
 
+        private readonly object _lock = new object();
+
         public WarDecision()
         {
             _decisionId = Guid.NewGuid().ToString();
@@ -47,29 +49,35 @@ namespace WarCouncilModern.Models.Entities
         public string ProposedByHeroId { get { return _proposedByHeroId; } set { _proposedByHeroId = value ?? string.Empty; } }
         public DateTime ProposedAtUtc { get { return new DateTime(_proposedTicks, DateTimeKind.Utc); } set { _proposedTicks = value.ToUniversalTime().Ticks; } }
 
-        public IReadOnlyDictionary<string, bool> Votes => _votes;
+        public IReadOnlyDictionary<string, bool> Votes { get { lock(_lock) return _votes; } }
 
         public void RecordVote(string heroId, bool vote)
         {
             if (string.IsNullOrEmpty(heroId)) return;
-            _votes[heroId] = vote;
+            lock (_lock)
+            {
+                _votes[heroId] = vote;
+            }
         }
 
-        public int GetYeaVotes() => _votes.Count(v => v.Value);
-        public int GetNayVotes() => _votes.Count(v => !v.Value);
+        public int GetYeaVotes() { lock(_lock) return _votes.Count(v => v.Value); }
+        public int GetNayVotes() { lock(_lock) return _votes.Count(v => !v.Value); }
 
         public void RehydrateVotes(IGameApi gameApi)
         {
-            // This is mainly for validation in case hero IDs become invalid
-            var validVotes = new Dictionary<string, bool>();
-            foreach (var vote in _votes)
+            lock (_lock)
             {
-                if (gameApi.FindHeroByStringId(vote.Key) != null)
+                // This is mainly for validation in case hero IDs become invalid
+                var validVotes = new Dictionary<string, bool>();
+                foreach (var vote in _votes)
                 {
-                    validVotes[vote.Key] = vote.Value;
+                    if (gameApi.FindHeroByStringId(vote.Key) != null)
+                    {
+                        validVotes[vote.Key] = vote.Value;
+                    }
                 }
+                _votes = validVotes;
             }
-            _votes = validVotes;
         }
 
         public override string ToString() => $"Decision[{DecisionId}]: {Title} ({Status})";
