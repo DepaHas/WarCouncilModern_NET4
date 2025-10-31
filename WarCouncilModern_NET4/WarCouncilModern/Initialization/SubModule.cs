@@ -21,6 +21,7 @@ namespace WarCouncilModern.Initialization
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
         internal static IWarCouncilManager WarCouncilManager { get; private set; }
         internal static ICouncilService CouncilService { get; private set; }
+        internal static IWarDecisionService WarDecisionService { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
@@ -49,10 +50,11 @@ namespace WarCouncilModern.Initialization
                 gameStarter.AddBehavior(behavior);
 
                 var settings = new StubModSettings();
+                var featureRegistry = new FeatureRegistry(settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
                     behavior,
-                    new FeatureRegistry(settings),
+                    featureRegistry,
                     Logger,
                     new ModStateTracker(Logger),
                     new CouncilMeetingService(Logger),
@@ -62,6 +64,7 @@ namespace WarCouncilModern.Initialization
                 );
                 WarCouncilManager = initializer.Manager;
                 CouncilService = new CouncilService(WarCouncilManager, Logger);
+                WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, Logger);
             }
         }
 

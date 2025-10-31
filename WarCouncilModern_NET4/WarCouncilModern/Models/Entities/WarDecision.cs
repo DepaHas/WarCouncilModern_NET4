@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using TaleWorlds.SaveSystem;
 
 namespace WarCouncilModern.Models.Entities
@@ -11,6 +13,7 @@ namespace WarCouncilModern.Models.Entities
         [SaveableField(4)] private string _status;
         [SaveableField(5)] private string _proposedByHeroId;
         [SaveableField(6)] private long _proposedTicks;
+        [SaveableField(7)] private Dictionary<string, bool> _votes = new Dictionary<string, bool>();
 
         public WarDecision()
         {
@@ -41,6 +44,17 @@ namespace WarCouncilModern.Models.Entities
         public string Status { get { return _status; } set { _status = value ?? string.Empty; } }
         public string ProposedByHeroId { get { return _proposedByHeroId; } set { _proposedByHeroId = value ?? string.Empty; } }
         public DateTime ProposedAtUtc { get { return new DateTime(_proposedTicks, DateTimeKind.Utc); } set { _proposedTicks = value.ToUniversalTime().Ticks; } }
+
+        public IReadOnlyDictionary<string, bool> Votes => _votes;
+
+        public void RecordVote(string heroId, bool vote)
+        {
+            if (string.IsNullOrEmpty(heroId)) return;
+            _votes[heroId] = vote;
+        }
+
+        public int GetYeaVotes() => _votes.Count(v => v.Value);
+        public int GetNayVotes() => _votes.Count(v => !v.Value);
 
         public override string ToString() => $"Decision[{DecisionId}]: {Title} ({Status})";
     }
