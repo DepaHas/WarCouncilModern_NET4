@@ -16,12 +16,12 @@ namespace WarCouncilModern.Core.Services
 
         public void ScheduleMeetingForDecision(WarCouncil council, WarDecision decision)
         {
-            _logger.Info("Scheduling a meeting for decision: " + decision.Title);
+            _logger.Log("Scheduling a meeting for decision: " + decision.Title);
         }
 
         public void CancelMeeting(Guid meetingId)
         {
-            _logger.Info("Canceling meeting: " + meetingId.ToString());
+            _logger.Log("Canceling meeting: " + meetingId.ToString());
         }
     }
 }

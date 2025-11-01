@@ -4,13 +4,11 @@ using TaleWorlds.Library;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class ViewModelBase : ViewModel, INotifyPropertyChanged
+    public class ViewModelBase : ViewModel
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            base.OnPropertyChanged(propertyName);
         }
     }
 }

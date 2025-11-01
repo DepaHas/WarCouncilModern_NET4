@@ -9,7 +9,7 @@ namespace WarCouncilModern.UI.Screens
     {
         private GauntletLayer _gauntletLayer;
         private DecisionDetailViewModel _dataSource;
-        private IGauntletMovie _movie;
+        private GauntletMovieIdentifier _movie;
 
         // Note: _dataSource would be initialized with a specific decision context
         public DecisionDetailScreen(DecisionDetailViewModel dataSource)
@@ -33,7 +33,6 @@ namespace WarCouncilModern.UI.Screens
                 RemoveLayer(_gauntletLayer);
                 _gauntletLayer.ReleaseMovie(_movie);
                 _gauntletLayer = null;
-                _movie = null;
             }
         }
 

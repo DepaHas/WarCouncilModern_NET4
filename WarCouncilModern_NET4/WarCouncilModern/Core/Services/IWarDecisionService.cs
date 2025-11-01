@@ -17,7 +17,7 @@ namespace WarCouncilModern.Core.Services
         /// <param name="proposer">The hero proposing the decision.</param>
         /// <param name="executionPayload">The data required to execute the decision.</param>
         /// <returns>The newly created WarDecision.</returns>
-        WarDecision ProposeDecision(WarCouncil council, string title, string description, Hero proposer, string? executionPayload = null);
+        WarDecision? ProposeDecision(WarCouncil council, string title, string description, Hero proposer, string? executionPayload = null);
 
         /// <summary>
         /// Records a vote from a hero on a specific decision.

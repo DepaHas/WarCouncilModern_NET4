@@ -22,7 +22,8 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
         public override void RegisterEvents()
         {
             CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
-            CampaignEvents.BeforeSave.AddNonSerializedListener(this, OnGameSaved);
+            // TODO: Verify this is the correct event for pre-save logic in the target Bannerlord version.
+            CampaignEvents.OnBeforeSaveEvent.AddNonSerializedListener(this, OnGameSaved);
         }
 
         private void OnGameLoaded(CampaignGameStarter gameStarter)
@@ -43,8 +44,8 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
 
         private void EnsureInitialCouncilsOnce()
         {
-            var playerKingdom = Hero.MainHero.MapFaction as Kingdom;
-            if (playerKingdom == null || !playerKingdom.IsPlayerKingdom || SubModule.WarCouncilManager == null || SubModule.CouncilService == null) return;
+            var playerKingdom = Campaign.Current?.Kingdoms?.FirstOrDefault(k => k.IsPlayerKingdom);
+            if (playerKingdom == null || SubModule.WarCouncilManager == null || SubModule.CouncilService == null) return;
 
             if (!SubModule.WarCouncilManager.HasActiveCouncilForKingdom(playerKingdom.StringId))
             {

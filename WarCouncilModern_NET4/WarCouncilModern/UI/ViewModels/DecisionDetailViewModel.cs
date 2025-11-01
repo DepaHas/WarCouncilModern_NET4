@@ -2,7 +2,7 @@ using TaleWorlds.Library;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class DecisionDetailViewModel : ViewModel
+    public class DecisionDetailViewModel : ViewModelBase
     {
         private string _title;
         private string _description;

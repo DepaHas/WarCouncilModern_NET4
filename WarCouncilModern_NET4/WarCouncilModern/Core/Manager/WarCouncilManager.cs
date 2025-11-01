@@ -16,16 +16,14 @@ namespace WarCouncilModern.Core.Manager
     public interface IWarCouncilManager
     {
         IReadOnlyList<WarCouncil> Councils { get; }
-        WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
+        WarCouncil? CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
         WarCouncil? GetCouncilById(Guid saveId);
         WarCouncil? GetCouncilByFaction(string factionId);
-        WarCouncil? FindCouncilById(Guid councilId);
-        WarCouncil? FindCouncilByDecisionId(Guid decisionId);
         bool HasActiveCouncilForKingdom(string kingdomId);
         bool RemoveCouncil(Guid saveId);
         bool AddMemberToCouncil(Guid councilId, WarHero hero);
         bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId);
-        WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
+        WarDecision? ProposeDecision(Guid councilId, string title, string description, Guid proposedBy);
         Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId);
         void RebuildReferencesAfterLoad(IGameApi gameApi);
     }
@@ -71,38 +69,77 @@ namespace WarCouncilModern.Core.Manager
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
         }
 
-        public WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "")
+        public WarCouncil? CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "")
         {
-            var council = new WarCouncil(kingdomId) { Name = name, LeaderHeroId = leaderHeroId };
-            _behavior.AddCouncil(council);
-            return council;
+            if (string.IsNullOrEmpty(kingdomId))
+            {
+                throw new ArgumentNullException(nameof(kingdomId));
+            }
+
+            lock (_locker)
+            {
+                if (_behavior.Councils.Values.Any(c => c.KingdomStringId == kingdomId))
+                {
+                    _logger.Warn($"[WarCouncilManager] Council for kingdom '{kingdomId}' already exists.");
+                    return null;
+                }
+
+                var council = new WarCouncil(kingdomId, CouncilStructure.Standard)
+                {
+                    Name = name
+                };
+                council.AssignLeaderByHeroId(leaderHeroId);
+
+                _behavior.Councils.Add(council.SaveId, council);
+                _logger.Info($"[WarCouncilManager] Created council '{council.Name}' for kingdom '{kingdomId}' ({council.SaveId}).");
+                _stateTracker.RecordCouncilCreated();
+                return council;
+            }
         }
 
         public WarCouncil? GetCouncilById(Guid saveId)
         {
-            return _behavior.GetCouncilById(saveId.ToString());
+            lock (_locker)
+            {
+                _behavior.Councils.TryGetValue(saveId.ToString(), out var council);
+                return council;
+            }
         }
 
         public WarCouncil? GetCouncilByFaction(string factionId)
         {
-            return Councils.FirstOrDefault(c => c.KingdomId == factionId);
+            lock (_locker)
+            {
+                return _behavior.Councils.Values.FirstOrDefault(c => c.KingdomStringId == factionId);
+            }
         }
 
         public bool HasActiveCouncilForKingdom(string kingdomId)
         {
-            return Councils.Any(c => c.KingdomId == kingdomId);
+            lock (_locker)
+            {
+                return _behavior.Councils.Values.Any(c => c.KingdomStringId == kingdomId);
+            }
         }
 
         public bool RemoveCouncil(Guid saveId)
         {
-            return _behavior.RemoveCouncil(saveId.ToString());
+            lock (_locker)
+            {
+                if (_behavior.Councils.Remove(saveId.ToString()))
+                {
+                    _logger.Info($"[WarCouncilManager] Removed council '{saveId}'.");
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool AddMemberToCouncil(Guid councilId, WarHero hero)
         {
             var council = GetCouncilById(councilId);
             if (council == null) return false;
-            council.AddMember(hero);
+            council.AddMemberById(hero.SaveId.ToString());
             return true;
         }
 
@@ -110,45 +147,33 @@ namespace WarCouncilModern.Core.Manager
         {
             var council = GetCouncilById(councilId);
             if (council == null) return false;
-            council.RemoveMember(heroSaveId.ToString());
-            return true;
+            return council.RemoveMemberById(heroSaveId.ToString());
         }
 
-        public WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy)
+        public WarDecision? ProposeDecision(Guid councilId, string title, string description, Guid proposedBy)
         {
             var council = GetCouncilById(councilId);
             if (council == null) return null;
-            var decision = new WarDecision(Guid.NewGuid().ToString(), title, proposedBy.ToString(), "Proposed") { Description = description };
+            var decision = new WarDecision(title, description, proposedBy.ToString());
             council.AddDecision(decision);
+            _stateTracker.RecordDecisionProposed();
             return decision;
         }
 
-        public async Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
+        public Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
         {
-            var council = GetCouncilById(councilId);
-            var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
-            if (council == null || decision == null) return false;
-
-            await _decisionService.ProcessDecisionAsync(council, decision);
-            return true;
+            return _decisionService.ProcessDecisionAsync(councilId, decisionId);
         }
 
         public void RebuildReferencesAfterLoad(IGameApi gameApi)
         {
-            foreach (var council in Councils)
+            lock (_locker)
             {
-                council.RehydrateReferences(gameApi);
+                foreach (var council in _behavior.Councils.Values)
+                {
+                    council.RebuildMembers(gameApi);
+                }
             }
-        }
-
-        public WarCouncil? FindCouncilById(Guid councilId)
-        {
-            return Councils.FirstOrDefault(c => new Guid(c.SaveId) == councilId);
-        }
-
-        public WarCouncil? FindCouncilByDecisionId(Guid decisionId)
-        {
-            return Councils.FirstOrDefault(c => c.Decisions.Any(d => new Guid(d.DecisionId) == decisionId));
         }
     }
 }

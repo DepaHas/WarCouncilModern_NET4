@@ -9,14 +9,14 @@ namespace WarCouncilModern.Core.Events
     public static class CouncilEvents
     {
         // Council Lifecycle Events
-        public static event Action<WarCouncil>? OnCouncilCreated;
-        public static event Action<WarCouncil>? OnCouncilEnded;
+        public static event Action<WarCouncil> OnCouncilCreated;
+        public static event Action<WarCouncil> OnCouncilEnded;
 
         // Decision Lifecycle Events
-        public static event Action<WarCouncil, WarDecision>? OnDecisionProposed;
-        public static event Action<WarCouncil, WarDecision, string, bool>? OnVoteRecorded;
-        public static event Action<WarCouncil, WarDecision>? OnDecisionProcessed;
-        public static event Action<WarCouncil, WarDecision>? OnDecisionExecuted;
+        public static event Action<WarCouncil, WarDecision> OnDecisionProposed;
+        public static event Action<WarCouncil, WarDecision, string, bool> OnVoteRecorded;
+        public static event Action<WarCouncil, WarDecision> OnDecisionProcessed;
+        public static event Action<WarCouncil, WarDecision> OnDecisionExecuted;
 
 
         internal static void RaiseCouncilCreated(WarCouncil council)
