@@ -8,7 +8,7 @@ using TaleWorlds.ScreenSystem;
 using WarCouncilModern.Initialization;
 using WarCouncilModern.UI.States;
 using WarCouncilModern.UI.ViewModels;
-using WarCouncilModern.UI.Views;
+//using WarCouncilModern.UI.Views;
 
 namespace WarCouncilModern.UI.Screens
 {
