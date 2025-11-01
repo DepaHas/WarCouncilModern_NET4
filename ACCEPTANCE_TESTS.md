@@ -1,44 +1,44 @@
 # Acceptance Tests
 
-This document outlines the manual acceptance tests to be performed before submitting changes related to the core architecture refactoring.
+This document outlines the manual testing procedures required to verify feature correctness before merging.
 
-## Test Case 1: Create -> Propose -> Vote -> Tally -> Save -> Load -> Verify
+## Feature: Propose Decision End-to-End Flow
 
-**Objective:** Verify the end-to-end lifecycle of a council and a decision, including persistence.
+**Goal:** Verify that a new decision can be proposed via the dev tools, is correctly persisted after a save/load cycle, and the UI state is updated.
 
-1.  **Start Game:** Launch a new campaign.
-2.  **Verify Council Creation:** A council for the player's kingdom should be created automatically on game load.
-    *   *Expected:* Log messages indicating the creation of the council and the addition of members.
-3.  **Propose Decision (Manual Trigger):** From a debug console or test menu, trigger `WarDecisionService.ProposeDecision` for the player council.
-    *   *Expected:* Log messages indicating the decision was proposed.
-4.  **Cast Votes (Manual Trigger):** Trigger `WarDecisionService.RecordVote` for several members of the council. Cast a majority of 'Yea' votes.
-    *   *Expected:* Log messages for each vote recorded.
-5.  **Process Decision (Manual Trigger):** Trigger `WarDecisionService.ProcessDecision`.
-    *   *Expected:* Log messages indicating the decision was 'Approved' and then 'Executed' by the `LogExecutionHandler`. The `OnDecisionExecuted` event should fire.
-6.  **Save Game:** Save the game after the decision has been executed.
-7.  **Load Game:** Load the saved game.
-8.  **Verify State:**
-    *   *Expected:* The game loads without errors. The `RebuildReferencesAfterLoad` logic runs successfully (check logs).
-    *   *Expected:* The player council still exists and is not duplicated.
-    *   *Expected:* The executed decision is present in the council's decision list with the correct status ('Executed') and all votes are intact.
+**Run this test 3 times.**
 
-## Test Case 2: Auto-Decision Processing Feature Flag
+### Test Steps:
 
-**Objective:** Verify that the `AutoDecisionProcessing` feature flag correctly bypasses the voting process.
+1.  **Start Game & Load Save:**
+    *   Launch the game and load a campaign save file.
 
-1.  **Enable Feature:** In `Core/State/FeatureRegistry.cs`, temporarily change `IsEnabled` to return `true`.
-2.  **Start Game:** Launch a new campaign.
-3.  **Propose Decision (Manual Trigger):** As in Test Case 1, propose a new decision.
-4.  **Process Decision (Manual Trigger):** Trigger `WarDecisionService.ProcessDecision`.
-    *   *Expected:* Log messages should indicate that the decision is being auto-processed due to the feature flag.
-    *   *Expected:* The decision status should immediately become 'Executed' without any votes being cast.
-5.  **Cleanup:** Revert the change in `FeatureRegistry.cs`.
+2.  **Create a Council:**
+    *   Open the developer console.
+    *   Execute the command to create a new council for a kingdom (e.g., the player's kingdom).
+    *   **Expected:** The log shows a confirmation that a new council has been created with a unique `councilId`.
 
-## Test Case 3: Duplicate Council Prevention
+3.  **Propose a Decision:**
+    *   Note the `councilId` from the previous step.
+    *   Execute the command to propose a new decision, providing the `councilId`, a title, a description, and a JSON string as the payload.
+        *   Example Payload: `"{ 'target': 'faction_vlandia', 'value': -10 }"`
+    *   **Expected:**
+        *   The log shows a confirmation that the decision proposal request was sent.
+        *   The log shows that the `WarDecisionService` received the request and noted that a payload was attached (`Payload attached: True`).
+        *   The UI (if a debug view is open) should update to reflect the new active decision count for the relevant council.
 
-**Objective:** Verify that starting a council for the same kingdom twice does not create a duplicate.
+4.  **Save the Game:**
+    *   Save the game to a new slot.
 
-1.  **Start Game:** Launch a new campaign. A council is created automatically.
-2.  **Trigger Council Creation Again (Manual Trigger):** From a debug console, call `CouncilService.StartCouncilForKingdom` for the player's kingdom again.
-    *   *Expected:* Log messages should indicate that a council for the kingdom already exists.
-    *   *Expected:* No new council is created. The existing council is returned. The total number of councils for the kingdom remains 1.
+5.  **Load the Game:**
+    *   Load the save file you just created.
+
+6.  **Verify State:**
+    *   Using the developer console or debug UI, inspect the council that was created in step 2.
+    *   **Expected:**
+        *   The council exists and has not been duplicated.
+        *   The decision proposed in step 3 exists within that council.
+        *   The decision's `ExecutionPayload.RawPayload` field matches the string provided in step 3 exactly.
+        *   The decision's status is "Proposed".
+
+**Pass Criteria:** All expected outcomes are met across all three test runs. No errors are logged, and no data is lost or duplicated.
