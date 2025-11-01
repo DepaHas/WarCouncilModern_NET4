@@ -41,6 +41,16 @@ namespace WarCouncilModern.Core.State
             }
         }
 
+        public void RecordCouncilCreated()
+        {
+            RecordEvent("CouncilCreated", Guid.Empty);
+        }
+
+        public void RecordDecisionProposed()
+        {
+            RecordEvent("DecisionProposed", Guid.Empty);
+        }
+
         public IReadOnlyList<(DateTime Time, string EventType, Guid Entity, object? Metadata)> GetEvents() => _events.AsReadOnly();
 
         public ModStats GetStats()

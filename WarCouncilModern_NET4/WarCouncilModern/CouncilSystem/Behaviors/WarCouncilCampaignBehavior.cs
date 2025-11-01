@@ -44,7 +44,7 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
 
         private void EnsureInitialCouncilsOnce()
         {
-            var playerKingdom = Campaign.Current?.Kingdoms?.FirstOrDefault(k => k.IsPlayerKingdom);
+            var playerKingdom = Hero.MainHero.MapFaction as Kingdom;
             if (playerKingdom == null || SubModule.WarCouncilManager == null || SubModule.CouncilService == null) return;
 
             if (!SubModule.WarCouncilManager.HasActiveCouncilForKingdom(playerKingdom.StringId))
@@ -71,7 +71,7 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
             }
         }
 
-        public WarCouncil GetCouncilById(string saveId)
+        public WarCouncil? GetCouncilById(string saveId)
         {
             _councils.TryGetValue(saveId, out var council);
             return council;

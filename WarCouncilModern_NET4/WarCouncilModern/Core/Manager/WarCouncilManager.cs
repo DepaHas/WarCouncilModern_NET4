@@ -19,6 +19,7 @@ namespace WarCouncilModern.Core.Manager
         WarCouncil? CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
         WarCouncil? GetCouncilById(Guid saveId);
         WarCouncil? GetCouncilByFaction(string factionId);
+        WarCouncil? FindCouncilByDecisionId(Guid decisionId);
         bool HasActiveCouncilForKingdom(string kingdomId);
         bool RemoveCouncil(Guid saveId);
         bool AddMemberToCouncil(Guid councilId, WarHero hero);
@@ -84,7 +85,7 @@ namespace WarCouncilModern.Core.Manager
                     return null;
                 }
 
-                var council = new WarCouncil(kingdomId, CouncilStructure.Standard)
+                var council = new WarCouncil(kingdomId, CouncilStructure.Elected)
                 {
                     Name = name
                 };
@@ -114,6 +115,14 @@ namespace WarCouncilModern.Core.Manager
             }
         }
 
+        public WarCouncil? FindCouncilByDecisionId(Guid decisionId)
+        {
+            lock (_locker)
+            {
+                return _behavior.Councils.Values.FirstOrDefault(c => c.Decisions.Any(d => d.SaveId == decisionId.ToString()));
+            }
+        }
+
         public bool HasActiveCouncilForKingdom(string kingdomId)
         {
             lock (_locker)
@@ -139,7 +148,7 @@ namespace WarCouncilModern.Core.Manager
         {
             var council = GetCouncilById(councilId);
             if (council == null) return false;
-            council.AddMemberById(hero.SaveId.ToString());
+            council.AddMemberById(hero.HeroStringId);
             return true;
         }
 
@@ -154,7 +163,10 @@ namespace WarCouncilModern.Core.Manager
         {
             var council = GetCouncilById(councilId);
             if (council == null) return null;
-            var decision = new WarDecision(title, description, proposedBy.ToString());
+            var decision = new WarDecision(Guid.NewGuid().ToString(), title, proposedBy.ToString(), "Proposed")
+            {
+                Description = description
+            };
             council.AddDecision(decision);
             _stateTracker.RecordDecisionProposed();
             return decision;
@@ -162,7 +174,13 @@ namespace WarCouncilModern.Core.Manager
 
         public Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
         {
-            return _decisionService.ProcessDecisionAsync(councilId, decisionId);
+            var council = GetCouncilById(councilId);
+            var decision = council?.Decisions.FirstOrDefault(d => d.SaveId == decisionId.ToString());
+            if (council == null || decision == null)
+            {
+                return Task.FromResult(false);
+            }
+            return _decisionService.ProcessDecisionAsync(council, decision);
         }
 
         public void RebuildReferencesAfterLoad(IGameApi gameApi)

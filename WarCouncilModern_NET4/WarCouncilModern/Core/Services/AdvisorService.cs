@@ -15,12 +15,12 @@ namespace WarCouncilModern.Core.Services
 
         public void InitializeForCouncil(WarCouncil council)
         {
-            _logger.Log("Initializing advisor service for council: " + council.Name);
+            _logger.Info("Initializing advisor service for council: " + council.Name);
         }
 
         public void OnDecisionProposed(WarCouncil council, WarDecision decision)
         {
-            _logger.Log("Advisor service notified of proposed decision: " + decision.Title);
+            _logger.Info("Advisor service notified of proposed decision: " + decision.Title);
         }
     }
 }

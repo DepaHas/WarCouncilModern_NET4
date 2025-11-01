@@ -77,7 +77,7 @@ namespace WarCouncilModern.UI.Services
             {
                 await Task.Run(() =>
                 {
-                    var council = _manager.FindCouncilById(councilId);
+                    var council = _manager.GetCouncilById(councilId);
                     if (council == null) return;
                     _warDecisionService.ProposeDecision(council, title, description, Hero.MainHero, payload);
                 }, cancellationToken);
@@ -95,7 +95,7 @@ namespace WarCouncilModern.UI.Services
             {
                 await Task.Run(() =>
                 {
-                    var council = _manager.FindCouncilById(councilId);
+                    var council = _manager.GetCouncilById(councilId);
                     var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
                     if (decision == null) return;
                     _warDecisionService.RecordVote(decision, Hero.MainHero, vote);
@@ -114,7 +114,7 @@ namespace WarCouncilModern.UI.Services
             {
                 await Task.Run(() =>
                 {
-                    var council = _manager.FindCouncilById(councilId);
+                    var council = _manager.GetCouncilById(councilId);
                     var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
                     if (council == null || decision == null) return;
                     _warDecisionService.ProcessDecision(council, decision);
@@ -157,14 +157,14 @@ namespace WarCouncilModern.UI.Services
                     var decisionDto = councilDto.Decisions.FirstOrDefault(d => d.DecisionGuid == new Guid(decision.DecisionId));
                     if (decisionDto != null)
                     {
-                       if (decision.Status != "Proposed" && decision.Status != "VotingOpen")
-                       {
-                           councilDto.Decisions.Remove(decisionDto);
-                       }
-                       else
-                       {
-                           decisionDto.Status = decision.Status;
-                       }
+                        if (decision.Status != "Proposed" && decision.Status != "VotingOpen")
+                        {
+                            councilDto.Decisions.Remove(decisionDto);
+                        }
+                        else
+                        {
+                            decisionDto.Status = decision.Status;
+                        }
                     }
                 }
             });
