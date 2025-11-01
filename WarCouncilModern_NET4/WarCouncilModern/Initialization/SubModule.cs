@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +16,7 @@ using WarCouncilModern.DevTools;
 using WarCouncilModern.Models.Persistence;
 using WarCouncilModern.UI;
 using WarCouncilModern.UI.Interfaces;
+using WarCouncilModern.UI.Providers;
 using WarCouncilModern.UI.Services;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
@@ -33,6 +34,7 @@ namespace WarCouncilModern.Initialization
         internal static IGameApi GameApi { get; private set; }
         internal static DevCouncilPanel DevPanel { get; private set; }
         internal static IUiInvoker UiInvoker { get; private set; }
+        internal static ICouncilProvider CouncilProvider { get; private set; }
         internal static ICouncilUiService CouncilUiService { get; private set; }
 
         protected override void OnSubModuleLoad()
@@ -83,9 +85,16 @@ namespace WarCouncilModern.Initialization
                 CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
                 WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
 
+#if DEBUG
+                CouncilProvider = new MockCouncilProvider();
+                Logger.Info("Using MockCouncilProvider for UI development.");
+#else
+                CouncilProvider = new LiveCouncilProvider(WarCouncilManager);
+#endif
+
                 var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 UiInvoker = new UiInvoker(uiScheduler);
-                CouncilUiService = new CouncilUiService(WarCouncilManager, WarDecisionService, UiInvoker, Logger);
+                CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
             }

@@ -11,58 +11,44 @@ using WarCouncilModern.Core.Services;
 using WarCouncilModern.Models.Entities;
 using WarCouncilModern.UI.Dto;
 using WarCouncilModern.UI.Platform;
+using WarCouncilModern.UI.Providers;
 using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.UI.Services
 {
     public class CouncilUiService : ICouncilUiService
     {
-        private readonly IWarCouncilManager _manager;
+        private readonly ICouncilProvider _councilProvider;
+        private readonly IWarCouncilManager _manager; // Still needed for write operations
         private readonly IWarDecisionService _warDecisionService;
         private readonly IUiInvoker _uiInvoker;
         private readonly IModLogger _logger;
-        private readonly object _lock = new object();
 
         private readonly ObservableCollection<WarCouncilDto> _allCouncils = new();
         public ObservableCollection<WarCouncilDto> AllCouncils => _allCouncils;
 
         private bool _isLoading;
-        public bool IsLoading
-        {
-            get => _isLoading;
-            private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); }
-        }
+        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
 
         private bool _isProposing;
-        public bool IsProposing
-        {
-            get => _isProposing;
-            private set { _isProposing = value; OnPropertyChanged(nameof(IsProposing)); }
-        }
+        public bool IsProposing { get => _isProposing; private set { _isProposing = value; OnPropertyChanged(nameof(IsProposing)); } }
 
         private bool _isVoting;
-        public bool IsVoting
-        {
-            get => _isVoting;
-            private set { _isVoting = value; OnPropertyChanged(nameof(IsVoting)); }
-        }
+        public bool IsVoting { get => _isVoting; private set { _isVoting = value; OnPropertyChanged(nameof(IsVoting)); } }
 
         private bool _isTallying;
-        public bool IsTallying
-        {
-            get => _isTallying;
-            private set { _isTallying = value; OnPropertyChanged(nameof(IsTallying)); }
-        }
-
+        public bool IsTallying { get => _isTallying; private set { _isTallying = value; OnPropertyChanged(nameof(IsTallying)); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public CouncilUiService(
+            ICouncilProvider councilProvider,
             IWarCouncilManager manager,
             IWarDecisionService warDecisionService,
             IUiInvoker uiInvoker,
             IModLogger logger)
         {
+            _councilProvider = councilProvider;
             _manager = manager;
             _warDecisionService = warDecisionService;
             _uiInvoker = uiInvoker;
@@ -72,10 +58,19 @@ namespace WarCouncilModern.UI.Services
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
             IsLoading = true;
-            CouncilEvents.OnCouncilCreated += OnCouncilCreated_Background;
             CouncilEvents.OnDecisionProposed += OnDecisionProposed_Background;
             CouncilEvents.OnDecisionProcessed += OnDecisionProcessed_Background;
-            await Task.Run(() => RebuildAllFromBackend(), cancellationToken);
+
+            var councils = await _councilProvider.GetCouncilsAsync(cancellationToken);
+            _uiInvoker.InvokeOnUi(() =>
+            {
+                _allCouncils.Clear();
+                foreach (var council in councils)
+                {
+                    _allCouncils.Add(council);
+                }
+            });
+
             IsLoading = false;
         }
 
@@ -87,19 +82,9 @@ namespace WarCouncilModern.UI.Services
                 await Task.Run(() =>
                 {
                     var council = _manager.FindCouncilById(councilId);
-                    if (council == null)
-                    {
-                        _logger.Warn($"[CouncilUiService] ProposeDecisionAsync failed: Council with id {councilId} not found.");
-                        return;
-                    }
-
-                    // In a real scenario, the proposer would be the player hero.
+                    if (council == null) return;
                     _warDecisionService.ProposeDecision(council, title, description, Hero.MainHero, payload);
                 }, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"[CouncilUiService] ProposeDecisionAsync failed: {ex.Message}");
             }
             finally
             {
@@ -116,20 +101,9 @@ namespace WarCouncilModern.UI.Services
                 {
                     var council = _manager.FindCouncilById(councilId);
                     var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
-
-                    if (decision == null)
-                    {
-                        _logger.Warn($"[CouncilUiService] CastVoteAsync failed: Decision with id {decisionId} not found in council {councilId}.");
-                        return;
-                    }
-
-                    // In a real scenario, the voter would be the player hero.
+                    if (decision == null) return;
                     _warDecisionService.RecordVote(decision, Hero.MainHero, vote);
                 }, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"[CouncilUiService] CastVoteAsync failed: {ex.Message}");
             }
             finally
             {
@@ -146,19 +120,9 @@ namespace WarCouncilModern.UI.Services
                 {
                     var council = _manager.FindCouncilById(councilId);
                     var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
-
-                    if (council == null || decision == null)
-                    {
-                        _logger.Warn($"[CouncilUiService] RequestTallyAndExecuteAsync failed: Decision {decisionId} or Council {councilId} not found.");
-                        return;
-                    }
-
+                    if (council == null || decision == null) return;
                     _warDecisionService.ProcessDecision(council, decision);
                 }, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"[CouncilUiService] RequestTallyAndExecuteAsync failed: {ex.Message}");
             }
             finally
             {
@@ -166,76 +130,48 @@ namespace WarCouncilModern.UI.Services
             }
         }
 
-        private void RebuildAllFromBackend()
-        {
-            lock (_lock)
-            {
-                var councils = _manager.Councils.ToList();
-                var dtos = councils.Select(ToDto).ToList();
-                _uiInvoker.InvokeOnUi(() =>
-                {
-                    _allCouncils.Clear();
-                    foreach (var d in dtos) _allCouncils.Add(d);
-                });
-            }
-        }
-
-        private void OnCouncilCreated_Background(WarCouncil council)
-        {
-            Task.Run(() =>
-            {
-                var dto = ToDto(council);
-                _uiInvoker.InvokeOnUi(() =>
-                {
-                    if (!_allCouncils.Any(c => c.SaveId == new Guid(dto.SaveId)))
-                        _allCouncils.Add(dto);
-                });
-            });
-        }
-
         private void OnDecisionProposed_Background(WarCouncil council, WarDecision decision)
         {
-            Task.Run(() =>
+            _uiInvoker.InvokeOnUi(() =>
             {
-                _uiInvoker.InvokeOnUi(() =>
+                var councilDto = _allCouncils.FirstOrDefault(c => c.SaveId == new Guid(council.SaveId));
+                if (councilDto != null)
                 {
-                    var councilDto = _allCouncils.FirstOrDefault(c => c.SaveId == new Guid(council.SaveId));
-                    if (councilDto != null)
+                    var decisionDto = new WarDecisionDto
                     {
-                        councilDto.ActiveDecisionsCount++;
-                    }
-                });
+                        DecisionGuid = new Guid(decision.DecisionId),
+                        Title = decision.Title,
+                        Description = decision.Description,
+                        Status = decision.Status,
+                        YeaCount = decision.GetYeaVotes(),
+                        NayCount = decision.GetNayVotes()
+                    };
+                    councilDto.Decisions.Add(decisionDto);
+                }
             });
         }
 
         private void OnDecisionProcessed_Background(WarCouncil council, WarDecision decision)
         {
-            Task.Run(() =>
+            _uiInvoker.InvokeOnUi(() =>
             {
-                _uiInvoker.InvokeOnUi(() =>
+                var councilDto = _allCouncils.FirstOrDefault(c => c.SaveId == new Guid(council.SaveId));
+                if (councilDto != null)
                 {
-                    var councilDto = _allCouncils.FirstOrDefault(c => c.SaveId == new Guid(council.SaveId));
-                    if (councilDto != null)
+                    var decisionDto = councilDto.Decisions.FirstOrDefault(d => d.DecisionGuid == new Guid(decision.DecisionId));
+                    if (decisionDto != null)
                     {
-                        // Refresh the count from the source of truth
-                        councilDto.ActiveDecisionsCount = council.Decisions?.Count(d => d.Status == "Proposed" || d.Status == "VotingOpen") ?? 0;
+                       if (decision.Status != "Proposed" && decision.Status != "VotingOpen")
+                       {
+                           councilDto.Decisions.Remove(decisionDto);
+                       }
+                       else
+                       {
+                           decisionDto.Status = decision.Status;
+                       }
                     }
-                });
+                }
             });
-        }
-
-        private WarCouncilDto ToDto(WarCouncil council)
-        {
-            return new WarCouncilDto
-            {
-                SaveId = new Guid(council.SaveId),
-                KingdomId = council.KingdomStringId,
-                Title = council.Name ?? $"{council.KingdomStringId} Council",
-                MemberCount = council.MemberHeroIds?.Count ?? 0,
-                ActiveDecisionsCount = council.Decisions?.Count(d => d.Status == "Proposed" || d.Status == "VotingOpen") ?? 0,
-                CreatedAt = council.CreatedAt,
-                Status = "Active"
-            };
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -245,7 +181,6 @@ namespace WarCouncilModern.UI.Services
 
         public void Dispose()
         {
-            CouncilEvents.OnCouncilCreated -= OnCouncilCreated_Background;
             CouncilEvents.OnDecisionProposed -= OnDecisionProposed_Background;
             CouncilEvents.OnDecisionProcessed -= OnDecisionProcessed_Background;
         }
