@@ -35,7 +35,7 @@ namespace WarCouncilModern.UI.Services
             private set { _currentOperation = value; OnPropertyChanged(nameof(CurrentOperation)); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public CouncilUiService(
             ICouncilProvider councilProvider,

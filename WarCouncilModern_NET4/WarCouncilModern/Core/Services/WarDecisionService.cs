@@ -24,7 +24,7 @@ namespace WarCouncilModern.Core.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public WarDecision ProposeDecision(WarCouncil council, string title, string description, Hero proposer, string executionPayload = null)
+        public WarDecision? ProposeDecision(WarCouncil council, string title, string description, Hero proposer, string? executionPayload = null)
         {
             if (council == null || proposer == null || string.IsNullOrWhiteSpace(title))
             {

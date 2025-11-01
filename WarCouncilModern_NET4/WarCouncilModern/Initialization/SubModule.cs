@@ -29,15 +29,15 @@ namespace WarCouncilModern.Initialization
     public class SubModule : MBSubModuleBase
     {
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
-        internal static IWarCouncilManager WarCouncilManager { get; private set; }
-        internal static ICouncilService CouncilService { get; private set; }
-        internal static IWarDecisionService WarDecisionService { get; private set; }
-        internal static IGameApi GameApi { get; private set; }
-        internal static DevCouncilPanel DevPanel { get; private set; }
-        internal static IUiInvoker UiInvoker { get; private set; }
-        internal static ICouncilProvider CouncilProvider { get; private set; }
-        internal static ICouncilUiService CouncilUiService { get; private set; }
-        internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; }
+        internal static IWarCouncilManager? WarCouncilManager { get; private set; }
+        internal static ICouncilService? CouncilService { get; private set; }
+        internal static IWarDecisionService? WarDecisionService { get; private set; }
+        internal static IGameApi? GameApi { get; private set; }
+        internal static DevCouncilPanel? DevPanel { get; private set; }
+        internal static IUiInvoker? UiInvoker { get; private set; }
+        internal static ICouncilProvider? CouncilProvider { get; private set; }
+        internal static ICouncilUiService? CouncilUiService { get; private set; }
+        internal static CouncilOverviewViewModel? CouncilOverviewViewModel { get; private set; }
 
         protected override void OnSubModuleLoad()
         {
