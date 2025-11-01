@@ -12,20 +12,18 @@ namespace WarCouncilModern.DevTools
     {
         private readonly ICouncilService _councilService;
         private readonly ICouncilUiService _councilUiService;
-        private readonly IWarDecisionService _decisionService;
         private readonly IModLogger _logger;
 
-        public DevCouncilPanel(ICouncilService councilService, ICouncilUiService councilUiService, IWarDecisionService decisionService, IModLogger logger)
+        public DevCouncilPanel(ICouncilService councilService, ICouncilUiService councilUiService, IModLogger logger)
         {
             _councilService = councilService;
             _councilUiService = councilUiService;
-            _decisionService = decisionService;
             _logger = logger;
         }
 
         public void ShowHelp()
         {
-            _logger.Info("[DevPanel] Commands: CreateCouncil(kingdomId), ProposeDecision(councilId, title, description, payload), RecordVote(decision, voter, vote), ProcessDecision(council, decision)");
+            _logger.Info("[DevPanel] Commands: CreateCouncil(kingdom), ProposeDecision(councilId, title, desc, payload), CastVote(councilId, decisionId, vote), TallyDecision(councilId, decisionId)");
         }
 
         public WarCouncil CreateCouncil(Kingdom kingdom)
@@ -39,20 +37,21 @@ namespace WarCouncilModern.DevTools
         {
             _logger.Info($"[DevPanel] Requesting to propose decision '{title}' in council {councilId}...");
             await _councilUiService.ProposeDecisionAsync(councilId, title, description, payload);
-            _logger.Info($"[DevPanel] Decision proposal request sent for council {councilId}. Check UI for updates.");
+            _logger.Info($"[DevPanel] Decision proposal request sent for council {councilId}.");
         }
 
-
-        public void RecordVote(WarDecision decision, Hero voter, bool vote)
+        public async void CastVote(Guid councilId, Guid decisionId, bool vote)
         {
-            _decisionService.RecordVote(decision, voter, vote);
-            _logger.Info($"[DevPanel] Vote recorded for decision {decision.DecisionId} by {voter.StringId}.");
+            _logger.Info($"[DevPanel] Casting vote '{vote}' on decision {decisionId} in council {councilId}...");
+            await _councilUiService.CastVoteAsync(councilId, decisionId, vote);
+            _logger.Info($"[DevPanel] Vote cast request sent for decision {decisionId}.");
         }
 
-        public void ProcessDecision(WarCouncil council, WarDecision decision)
+        public async void TallyDecision(Guid councilId, Guid decisionId)
         {
-            _decisionService.ProcessDecision(council, decision);
-            _logger.Info($"[DevPanel] Processed decision {decision.DecisionId}. Final status: {decision.Status}");
+            _logger.Info($"[DevPanel] Requesting tally for decision {decisionId} in council {councilId}...");
+            await _councilUiService.RequestTallyAndExecuteAsync(councilId, decisionId);
+            _logger.Info($"[DevPanel] Tally request sent for decision {decisionId}.");
         }
     }
 }

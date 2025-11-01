@@ -14,6 +14,8 @@ namespace WarCouncilModern.Core.Events
 
         // Decision Lifecycle Events
         public static event Action<WarCouncil, WarDecision> OnDecisionProposed;
+        public static event Action<WarCouncil, WarDecision, string, bool> OnVoteRecorded;
+        public static event Action<WarCouncil, WarDecision> OnDecisionProcessed;
         public static event Action<WarCouncil, WarDecision> OnDecisionExecuted;
 
 
@@ -35,6 +37,16 @@ namespace WarCouncilModern.Core.Events
         internal static void RaiseDecisionExecuted(WarCouncil council, WarDecision decision)
         {
             OnDecisionExecuted?.Invoke(council, decision);
+        }
+
+        internal static void RaiseVoteRecorded(WarCouncil council, WarDecision decision, string voterId, bool vote)
+        {
+            OnVoteRecorded?.Invoke(council, decision, voterId, vote);
+        }
+
+        internal static void RaiseDecisionProcessed(WarCouncil council, WarDecision decision)
+        {
+            OnDecisionProcessed?.Invoke(council, decision);
         }
     }
 }

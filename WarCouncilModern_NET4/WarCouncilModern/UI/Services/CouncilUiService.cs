@@ -40,6 +40,20 @@ namespace WarCouncilModern.UI.Services
             private set { _isProposing = value; OnPropertyChanged(nameof(IsProposing)); }
         }
 
+        private bool _isVoting;
+        public bool IsVoting
+        {
+            get => _isVoting;
+            private set { _isVoting = value; OnPropertyChanged(nameof(IsVoting)); }
+        }
+
+        private bool _isTallying;
+        public bool IsTallying
+        {
+            get => _isTallying;
+            private set { _isTallying = value; OnPropertyChanged(nameof(IsTallying)); }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -60,6 +74,7 @@ namespace WarCouncilModern.UI.Services
             IsLoading = true;
             CouncilEvents.OnCouncilCreated += OnCouncilCreated_Background;
             CouncilEvents.OnDecisionProposed += OnDecisionProposed_Background;
+            CouncilEvents.OnDecisionProcessed += OnDecisionProcessed_Background;
             await Task.Run(() => RebuildAllFromBackend(), cancellationToken);
             IsLoading = false;
         }
@@ -89,6 +104,65 @@ namespace WarCouncilModern.UI.Services
             finally
             {
                 IsProposing = false;
+            }
+        }
+
+        public async Task CastVoteAsync(Guid councilId, Guid decisionId, bool vote, CancellationToken cancellationToken = default)
+        {
+            IsVoting = true;
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var council = _manager.FindCouncilById(councilId);
+                    var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
+
+                    if (decision == null)
+                    {
+                        _logger.Warn($"[CouncilUiService] CastVoteAsync failed: Decision with id {decisionId} not found in council {councilId}.");
+                        return;
+                    }
+
+                    // In a real scenario, the voter would be the player hero.
+                    _warDecisionService.RecordVote(decision, Hero.MainHero, vote);
+                }, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"[CouncilUiService] CastVoteAsync failed: {ex.Message}");
+            }
+            finally
+            {
+                IsVoting = false;
+            }
+        }
+
+        public async Task RequestTallyAndExecuteAsync(Guid councilId, Guid decisionId, CancellationToken cancellationToken = default)
+        {
+            IsTallying = true;
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var council = _manager.FindCouncilById(councilId);
+                    var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
+
+                    if (council == null || decision == null)
+                    {
+                        _logger.Warn($"[CouncilUiService] RequestTallyAndExecuteAsync failed: Decision {decisionId} or Council {councilId} not found.");
+                        return;
+                    }
+
+                    _warDecisionService.ProcessDecision(council, decision);
+                }, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"[CouncilUiService] RequestTallyAndExecuteAsync failed: {ex.Message}");
+            }
+            finally
+            {
+                IsTallying = false;
             }
         }
 
@@ -134,6 +208,22 @@ namespace WarCouncilModern.UI.Services
             });
         }
 
+        private void OnDecisionProcessed_Background(WarCouncil council, WarDecision decision)
+        {
+            Task.Run(() =>
+            {
+                _uiInvoker.InvokeOnUi(() =>
+                {
+                    var councilDto = _allCouncils.FirstOrDefault(c => c.SaveId == new Guid(council.SaveId));
+                    if (councilDto != null)
+                    {
+                        // Refresh the count from the source of truth
+                        councilDto.ActiveDecisionsCount = council.Decisions?.Count(d => d.Status == "Proposed" || d.Status == "VotingOpen") ?? 0;
+                    }
+                });
+            });
+        }
+
         private WarCouncilDto ToDto(WarCouncil council)
         {
             return new WarCouncilDto
@@ -157,6 +247,7 @@ namespace WarCouncilModern.UI.Services
         {
             CouncilEvents.OnCouncilCreated -= OnCouncilCreated_Background;
             CouncilEvents.OnDecisionProposed -= OnDecisionProposed_Background;
+            CouncilEvents.OnDecisionProcessed -= OnDecisionProcessed_Background;
         }
     }
 }
