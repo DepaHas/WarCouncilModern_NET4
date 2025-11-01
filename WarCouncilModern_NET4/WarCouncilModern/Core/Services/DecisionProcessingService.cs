@@ -16,7 +16,7 @@ namespace WarCouncilModern.Core.Services
 
         public Task<bool> ProcessDecisionAsync(WarCouncil council, WarDecision decision)
         {
-            _logger.Info("Processing decision: " + decision.Title);
+            _logger.Log("Processing decision: " + decision.Title);
             return Task.FromResult(true);
         }
     }

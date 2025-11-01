@@ -30,7 +30,6 @@ namespace WarCouncilModern.Models.Entities
             _status = "Proposed";
             _proposedByHeroId = string.Empty;
             _proposedTicks = DateTime.UtcNow.Ticks;
-            _executionPayload = new DecisionExecutionPayload();
         }
 
         // مُشيد مطابق لاستدعاءات WarCouncilManager(4 args)

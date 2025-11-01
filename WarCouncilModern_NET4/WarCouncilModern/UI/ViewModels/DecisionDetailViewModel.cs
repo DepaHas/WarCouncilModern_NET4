@@ -1,6 +1,6 @@
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class DecisionViewModel : ViewModelBase
+    public class DecisionDetailViewModel : ViewModelBase
     {
     }
 }

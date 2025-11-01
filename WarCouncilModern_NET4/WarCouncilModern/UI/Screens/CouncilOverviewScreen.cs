@@ -10,7 +10,7 @@ namespace WarCouncilModern.UI.Screens
     {
         private GauntletLayer _gauntletLayer;
         private CouncilOverviewViewModel _dataSource;
-        private IGauntletMovie _movie;
+        private GauntletMovieIdentifier _movie;
 
         protected override void OnInitialize()
         {
@@ -34,7 +34,6 @@ namespace WarCouncilModern.UI.Screens
                 RemoveLayer(_gauntletLayer);
                 _gauntletLayer.ReleaseMovie(_movie);
                 _gauntletLayer = null;
-                _movie = null;
             }
         }
 
