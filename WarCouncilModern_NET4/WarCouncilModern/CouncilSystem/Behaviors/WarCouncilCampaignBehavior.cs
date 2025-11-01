@@ -62,8 +62,6 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
             dataStore.SyncData("_councils", ref _councils);
         }
 
-        public override string Id => "WarCouncilCampaignBehavior";
-
         public void AddCouncil(WarCouncil council)
         {
             if (!_councils.ContainsKey(council.SaveId))

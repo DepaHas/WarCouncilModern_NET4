@@ -1,20 +1,15 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.State;
 using WarCouncilModern.Core.Services;
-using WarCouncilModern.Models.Persistence;
 using WarCouncilModern.Core.Settings;
+using WarCouncilModern.CouncilSystem.Behaviors;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.Core.Init
 {
-    /// <summary>
-    /// مسؤول تهيئة اعتمادات المود وإنشاء WarCouncilManager بشكل آمن.
-    /// لاحظ: استدعاء new WarCouncilManager(...) يمرِّر الوسائط بالترتيب positional.
-    /// إن اختلف توقيع باني WarCouncilManager لديك، أرسل header الباني لأعيد كتابة الاستدعاء بدقة.
-    /// </summary>
     public class ModuleInitializer
     {
         private WarCouncilManager? _manager;
@@ -29,15 +24,10 @@ namespace WarCouncilModern.Core.Init
 
         public ModuleInitializer()
         {
-            // قيم افتراضية لتجنّب CS8618 وللسقوف الآمنة أثناء التطوير
             _logger = GlobalLog.Instance;
             _settings = new StubModSettings();
         }
 
-        /// <summary>
-        /// تهيئة الاعتمادات المطلوبة للمود.
-        /// استخدم هذا الأسلوب من SubModule أو من مكان تهيئة أعلى.
-        /// </summary>
         public void Initialize(
             WarCouncilCampaignBehavior behavior,
             IFeatureRegistry featureRegistry,
@@ -66,7 +56,6 @@ namespace WarCouncilModern.Core.Init
             if (svc == null)
             {
                 _advisorService = new StubAdvisorService(_logger);
-                _logger.Warn("AdvisorService was null; using StubAdvisorService as fallback.");
             }
             else
             {
@@ -78,7 +67,6 @@ namespace WarCouncilModern.Core.Init
         {
             try
             {
-                // مرّر positional لتجنّب مشكلة named-argument mismatch
                 _manager = new WarCouncilManager(
                     _behavior!,
                     _meetingService!,
@@ -89,17 +77,10 @@ namespace WarCouncilModern.Core.Init
                     _stateTracker!,
                     _featureRegistry!
                 );
-
-                _logger.Info("WarCouncilManager instantiated successfully.");
-            }
-            catch (MissingMethodException mex)
-            {
-                _logger.Error("Constructor mismatch when creating WarCouncilManager", mex);
-                throw;
             }
             catch (Exception ex)
             {
-                _logger.Error("Unexpected error creating WarCouncilManager", ex);
+                _logger.Error("Error creating WarCouncilManager", ex);
                 throw;
             }
         }
@@ -108,15 +89,7 @@ namespace WarCouncilModern.Core.Init
 
         public void Shutdown()
         {
-            try
-            {
-                _logger.Info("ModuleInitializer.Shutdown called.");
-                _manager = null;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error("Error during ModuleInitializer.Shutdown", ex);
-            }
+            _manager = null;
         }
     }
 }
