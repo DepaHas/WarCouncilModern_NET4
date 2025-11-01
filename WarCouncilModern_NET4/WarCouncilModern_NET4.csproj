@@ -190,7 +190,7 @@
     <Compile Include="WarCouncilModern\UI\States\WarCouncilState.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilItemViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewViewModel.cs" />
-    <Compile Include="WarCouncilModern\UI\ViewModels\DecisionViewModel.cs" />
+    <Compile Include="WarCouncilModern\UI\ViewModels\DecisionDetailViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\ViewModelBase.cs" />
     <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
     <Compile Include="WarCouncilModern\Utilities\GameApi.cs" />
