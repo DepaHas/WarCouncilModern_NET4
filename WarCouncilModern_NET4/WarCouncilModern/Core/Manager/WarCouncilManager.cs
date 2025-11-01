@@ -69,6 +69,54 @@ namespace WarCouncilModern.Core.Manager
             _featureRegistry = featureRegistry ?? throw new ArgumentNullException(nameof(featureRegistry));
         }
 
-        // ... (rest of the file is unchanged)
+        public WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public WarCouncil? GetCouncilById(Guid saveId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public WarCouncil? GetCouncilByFaction(string factionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasActiveCouncilForKingdom(string kingdomId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool RemoveCouncil(Guid saveId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool AddMemberToCouncil(Guid councilId, WarHero hero)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RebuildReferencesAfterLoad(IGameApi gameApi)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
