@@ -5,11 +5,11 @@ namespace WarCouncilModern.Core.Council
 {
     public class CouncilContext
     {
-        public string Reason { get; set; }
+        public string Reason { get; set; } = "";
     }
 
     public interface ICouncilMemberSelector
     {
-        IEnumerable<string> GetMembersForCouncil(string kingdomStringId, CouncilContext context = null);
+        IEnumerable<string> GetMembersForCouncil(string kingdomStringId, CouncilContext? context = null);
     }
 }

@@ -12,8 +12,8 @@ namespace WarCouncilModern.UI.ViewModels
 
         public ObservableCollection<CouncilItemViewModel> Councils { get; } = new ObservableCollection<CouncilItemViewModel>();
 
-        private CouncilItemViewModel _selectedCouncil;
-        public CouncilItemViewModel SelectedCouncil
+        private CouncilItemViewModel? _selectedCouncil;
+        public CouncilItemViewModel? SelectedCouncil
         {
             get => _selectedCouncil;
             private set

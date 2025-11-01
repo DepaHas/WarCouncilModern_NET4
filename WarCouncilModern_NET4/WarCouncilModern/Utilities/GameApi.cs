@@ -7,7 +7,7 @@ namespace WarCouncilModern.Utilities
 {
     public class GameApi : IGameApi
     {
-        public Hero FindHeroByStringId(string heroId)
+        public Hero? FindHeroByStringId(string heroId)
         {
             return Hero.FindAll(h => h.StringId == heroId).FirstOrDefault();
         }
@@ -27,25 +27,25 @@ namespace WarCouncilModern.Utilities
             return hero1.GetRelation(hero2);
         }
 
-        public Hero GetRulerHeroForKingdom(string kingdomId)
+        public Hero? GetRulerHeroForKingdom(string kingdomId)
         {
             var kingdom = Kingdom.All.FirstOrDefault(k => k.StringId == kingdomId);
             return kingdom?.Leader;
         }
 
-        public IFaction FindFactionById(string factionId)
+        public IFaction? FindFactionById(string factionId)
         {
-            return FactionManager.GetFaction(factionId);
+            return Campaign.Current.Factions.FirstOrDefault(f => f.StringId == factionId);
         }
 
-        public Kingdom FindKingdomByStringId(string kingdomId)
+        public Kingdom? FindKingdomByStringId(string kingdomId)
         {
             return Kingdom.All.FirstOrDefault(k => k.StringId == kingdomId);
         }
 
         public void ChangeRelationBetween(IFaction faction1, IFaction faction2, int relationDelta)
         {
-            faction1.SetRelation(faction2, faction1.GetRelation(faction2) + relationDelta);
+            FactionManager.SetRelation(faction1, faction2, FactionManager.GetRelation(faction1, faction2) + relationDelta);
         }
     }
 }

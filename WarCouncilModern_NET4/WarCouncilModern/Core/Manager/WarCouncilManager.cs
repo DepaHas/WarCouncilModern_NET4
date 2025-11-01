@@ -19,6 +19,8 @@ namespace WarCouncilModern.Core.Manager
         WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "");
         WarCouncil? GetCouncilById(Guid saveId);
         WarCouncil? GetCouncilByFaction(string factionId);
+        WarCouncil? FindCouncilById(Guid councilId);
+        WarCouncil? FindCouncilByDecisionId(Guid decisionId);
         bool HasActiveCouncilForKingdom(string kingdomId);
         bool RemoveCouncil(Guid saveId);
         bool AddMemberToCouncil(Guid councilId, WarHero hero);
@@ -71,52 +73,82 @@ namespace WarCouncilModern.Core.Manager
 
         public WarCouncil CreateCouncil(string kingdomId, string name = "Default Council", string leaderHeroId = "")
         {
-            throw new NotImplementedException();
+            var council = new WarCouncil(kingdomId) { Name = name, LeaderHeroId = leaderHeroId };
+            _behavior.AddCouncil(council);
+            return council;
         }
 
         public WarCouncil? GetCouncilById(Guid saveId)
         {
-            throw new NotImplementedException();
+            return _behavior.GetCouncilById(saveId.ToString());
         }
 
         public WarCouncil? GetCouncilByFaction(string factionId)
         {
-            throw new NotImplementedException();
+            return Councils.FirstOrDefault(c => c.KingdomId == factionId);
         }
 
         public bool HasActiveCouncilForKingdom(string kingdomId)
         {
-            throw new NotImplementedException();
+            return Councils.Any(c => c.KingdomId == kingdomId);
         }
 
         public bool RemoveCouncil(Guid saveId)
         {
-            throw new NotImplementedException();
+            return _behavior.RemoveCouncil(saveId.ToString());
         }
 
         public bool AddMemberToCouncil(Guid councilId, WarHero hero)
         {
-            throw new NotImplementedException();
+            var council = GetCouncilById(councilId);
+            if (council == null) return false;
+            council.AddMember(hero);
+            return true;
         }
 
         public bool RemoveMemberFromCouncil(Guid councilId, Guid heroSaveId)
         {
-            throw new NotImplementedException();
+            var council = GetCouncilById(councilId);
+            if (council == null) return false;
+            council.RemoveMember(heroSaveId.ToString());
+            return true;
         }
 
         public WarDecision ProposeDecision(Guid councilId, string title, string description, Guid proposedBy)
         {
-            throw new NotImplementedException();
+            var council = GetCouncilById(councilId);
+            if (council == null) return null;
+            var decision = new WarDecision(Guid.NewGuid().ToString(), title, proposedBy.ToString(), "Proposed") { Description = description };
+            council.AddDecision(decision);
+            return decision;
         }
 
-        public Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
+        public async Task<bool> ProcessDecisionAsync(Guid councilId, Guid decisionId)
         {
-            throw new NotImplementedException();
+            var council = GetCouncilById(councilId);
+            var decision = council?.Decisions.FirstOrDefault(d => new Guid(d.DecisionId) == decisionId);
+            if (council == null || decision == null) return false;
+
+            await _decisionService.ProcessDecisionAsync(council, decision);
+            return true;
         }
 
         public void RebuildReferencesAfterLoad(IGameApi gameApi)
         {
-            throw new NotImplementedException();
+            foreach (var council in Councils)
+            {
+                council.RehydrateReferences(gameApi);
+            }
+        }
+
+        public WarCouncil? FindCouncilById(Guid councilId)
+        {
+            return Councils.FirstOrDefault(c => new Guid(c.SaveId) == councilId);
+        }
+
+        public WarCouncil? FindCouncilByDecisionId(Guid decisionId)
+        {
+            return Councils.FirstOrDefault(c => c.Decisions.Any(d => new Guid(d.DecisionId) == decisionId));
         }
     }
 }

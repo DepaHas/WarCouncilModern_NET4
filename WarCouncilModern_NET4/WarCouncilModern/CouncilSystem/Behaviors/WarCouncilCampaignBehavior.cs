@@ -22,7 +22,7 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
         public override void RegisterEvents()
         {
             CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
-            CampaignEvents.OnGameSavedEvent.AddNonSerializedListener(this, OnGameSaved);
+            CampaignEvents.BeforeSave.AddNonSerializedListener(this, OnGameSaved);
         }
 
         private void OnGameLoaded(CampaignGameStarter gameStarter)
@@ -43,8 +43,8 @@ namespace WarCouncilModern.CouncilSystem.Behaviors
 
         private void EnsureInitialCouncilsOnce()
         {
-            var playerKingdom = Campaign.Current?.Kingdoms?.FirstOrDefault(k => k.IsPlayerKingdom);
-            if (playerKingdom == null || SubModule.WarCouncilManager == null || SubModule.CouncilService == null) return;
+            var playerKingdom = Hero.MainHero.MapFaction as Kingdom;
+            if (playerKingdom == null || !playerKingdom.IsPlayerKingdom || SubModule.WarCouncilManager == null || SubModule.CouncilService == null) return;
 
             if (!SubModule.WarCouncilManager.HasActiveCouncilForKingdom(playerKingdom.StringId))
             {
