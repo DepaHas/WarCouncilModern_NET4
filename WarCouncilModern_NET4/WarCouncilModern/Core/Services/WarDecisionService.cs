@@ -60,6 +60,11 @@ namespace WarCouncilModern.Core.Services
             }
 
             decision.RecordVote(voter.StringId, vote);
+            var council = _warCouncilManager.FindCouncilByDecisionId(new Guid(decision.DecisionId));
+            if (council != null)
+            {
+                CouncilEvents.RaiseVoteRecorded(council, decision, voter.StringId, vote);
+            }
             _logger.Info($"[WarDecisionService] councilId={decision.DecisionId} voter={voter.StringId} vote={(vote ? "Yea" : "Nay")}.");
         }
 
@@ -94,6 +99,7 @@ namespace WarCouncilModern.Core.Services
                 decision.Status = "Rejected";
                 _logger.Info($"[WarDecisionService] councilId={council.SaveId} decisionId={decision.DecisionId} was rejected with {yeaVotes} to {nayVotes}.");
             }
+            CouncilEvents.RaiseDecisionProcessed(council, decision);
         }
 
         private void ExecuteDecision(WarCouncil council, WarDecision decision)
