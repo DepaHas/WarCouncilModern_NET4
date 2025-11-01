@@ -10,6 +10,7 @@ using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Models.Entities;
 using WarCouncilModern.UI.Dto;
+using WarCouncilModern.UI.Enums;
 using WarCouncilModern.UI.Platform;
 using WarCouncilModern.UI.Providers;
 using WarCouncilModern.Utilities.Interfaces;
@@ -27,17 +28,12 @@ namespace WarCouncilModern.UI.Services
         private readonly ObservableCollection<WarCouncilDto> _allCouncils = new();
         public ObservableCollection<WarCouncilDto> AllCouncils => _allCouncils;
 
-        private bool _isLoading;
-        public bool IsLoading { get => _isLoading; private set { _isLoading = value; OnPropertyChanged(nameof(IsLoading)); } }
-
-        private bool _isProposing;
-        public bool IsProposing { get => _isProposing; private set { _isProposing = value; OnPropertyChanged(nameof(IsProposing)); } }
-
-        private bool _isVoting;
-        public bool IsVoting { get => _isVoting; private set { _isVoting = value; OnPropertyChanged(nameof(IsVoting)); } }
-
-        private bool _isTallying;
-        public bool IsTallying { get => _isTallying; private set { _isTallying = value; OnPropertyChanged(nameof(IsTallying)); } }
+        private OperationState _currentOperation = OperationState.None;
+        public OperationState CurrentOperation
+        {
+            get => _currentOperation;
+            private set { _currentOperation = value; OnPropertyChanged(nameof(CurrentOperation)); }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -57,7 +53,7 @@ namespace WarCouncilModern.UI.Services
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
-            IsLoading = true;
+            CurrentOperation = OperationState.Initializing;
             CouncilEvents.OnDecisionProposed += OnDecisionProposed_Background;
             CouncilEvents.OnDecisionProcessed += OnDecisionProcessed_Background;
 
@@ -71,12 +67,12 @@ namespace WarCouncilModern.UI.Services
                 }
             });
 
-            IsLoading = false;
+            CurrentOperation = OperationState.None;
         }
 
         public async Task ProposeDecisionAsync(Guid councilId, string title, string description, string payload, CancellationToken cancellationToken = default)
         {
-            IsProposing = true;
+            CurrentOperation = OperationState.Proposing;
             try
             {
                 await Task.Run(() =>
@@ -88,13 +84,13 @@ namespace WarCouncilModern.UI.Services
             }
             finally
             {
-                IsProposing = false;
+                CurrentOperation = OperationState.None;
             }
         }
 
         public async Task CastVoteAsync(Guid councilId, Guid decisionId, bool vote, CancellationToken cancellationToken = default)
         {
-            IsVoting = true;
+            CurrentOperation = OperationState.Voting;
             try
             {
                 await Task.Run(() =>
@@ -107,13 +103,13 @@ namespace WarCouncilModern.UI.Services
             }
             finally
             {
-                IsVoting = false;
+                CurrentOperation = OperationState.None;
             }
         }
 
         public async Task RequestTallyAndExecuteAsync(Guid councilId, Guid decisionId, CancellationToken cancellationToken = default)
         {
-            IsTallying = true;
+            CurrentOperation = OperationState.Tallying;
             try
             {
                 await Task.Run(() =>
@@ -126,7 +122,7 @@ namespace WarCouncilModern.UI.Services
             }
             finally
             {
-                IsTallying = false;
+                CurrentOperation = OperationState.None;
             }
         }
 
