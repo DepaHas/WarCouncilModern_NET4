@@ -125,8 +125,6 @@
     <Compile Include="WarCouncilModern\CouncilSystem\Strategies\WarPlanStrategy.cs" />
     <Compile Include="WarCouncilModern\Initialization\InitHelpers.cs" />
     <Compile Include="WarCouncilModern\Core\Settings\ModSettings.cs" />
-    <Compile Include="WarCouncilModern\Models\Persistence\CouncilPersistenceAdapter.cs" />
-    <Compile Include="WarCouncilModern\Models\Persistence\IPersistenceAdapter.cs" />
     <Compile Include="WarCouncilModern\Utilities\Interfaces\IModLogger.cs" />
     <Compile Include="WarCouncilModern\Utilities\Logging\ModLogger.cs" />
     <Compile Include="WarCouncilModern\Utilities\ModLogger.cs" />
@@ -150,7 +148,6 @@
     <Compile Include="WarCouncilModern\UI\Dialogues\CouncilDialogueFlow.cs" />
     <Compile Include="WarCouncilModern\UI\Screens\CouncilOverviewScreen.cs" />
     <Compile Include="WarCouncilModern\UI\Screens\DecisionDetailScreen.cs" />
-    <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewVM.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionViewModel.cs" />
     <Compile Include="WarCouncilModern\Utilities\Logging\LogFormatter.cs" />
   </ItemGroup>
