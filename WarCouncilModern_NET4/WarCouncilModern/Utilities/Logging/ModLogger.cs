@@ -40,6 +40,6 @@ namespace WarCouncilModern.Logging
             catch { /* ignore logging errors */ }
         }
 
-        public static string GetLatestLogPath() => File.Exists(LogFile) ? LogFile : null;
+        public static string? GetLatestLogPath() => File.Exists(LogFile) ? LogFile : null;
     }
 }
