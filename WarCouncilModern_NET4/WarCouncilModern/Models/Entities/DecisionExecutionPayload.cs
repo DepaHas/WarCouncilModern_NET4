@@ -5,9 +5,11 @@ namespace WarCouncilModern.Models.Entities
     public class DecisionExecutionPayload
     {
         [SaveableField(1)]
-        public string TargetFactionId { get; set; }
+        private string _targetFactionId;
+        public string TargetFactionId { get => _targetFactionId; set => _targetFactionId = value; }
 
         [SaveableField(2)]
-        public string RawPayload { get; set; }
+        private string _rawPayload;
+        public string RawPayload { get => _rawPayload; set => _rawPayload = value; }
     }
 }

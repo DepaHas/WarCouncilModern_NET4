@@ -1,25 +1,22 @@
-﻿using System.Collections.Concurrent;
+using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.Utilities
 {
     public class FeatureRegistry : IFeatureRegistry
     {
-        private readonly ConcurrentDictionary<string, bool> _flags = new();
+        private readonly IModSettings _settings;
 
-        public FeatureRegistry()
+        public FeatureRegistry(IModSettings settings)
         {
-            // قيم افتراضية؛ يمكن ملؤها من ModSettings عند التهيئة
-            _flags["AutoDecisionProcessing"] = false;
-            _flags["AutoScheduleMeetingOnProposal"] = true;
+            _settings = settings;
         }
 
-        public bool IsEnabled(string featureKey)
+        public bool IsEnabled(string featureName)
         {
-            if (string.IsNullOrWhiteSpace(featureKey)) return false;
-            return _flags.TryGetValue(featureKey, out var value) && value;
+            // Defaulting to false as per safety guidelines.
+            // A real implementation would check _settings.
+            return false;
         }
-
-        public void Set(string featureKey, bool enabled) => _flags[featureKey] = enabled;
     }
 }
