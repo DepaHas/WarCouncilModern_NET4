@@ -1,11 +1,47 @@
-using TaleWorlds.Engine.Screens;
+using TaleWorlds.Engine.GauntletUI;
+using TaleWorlds.GauntletUI.Data;
+using TaleWorlds.ScreenSystem;
+using WarCouncilModern.Initialization;
+using WarCouncilModern.UI.ViewModels;
 
-namespace WarCouncilModern.UI.Views
+namespace WarCouncilModern.UI.Screens
 {
     public class CouncilOverviewScreen : ScreenBase
     {
-        // This class is currently a placeholder to resolve a compilation issue.
-        // The actual screen logic is in WarCouncilScreen.cs, which loads the
-        // associated CouncilOverviewScreen.gauntlet.xml file.
+        private GauntletLayer _gauntletLayer;
+        private CouncilOverviewViewModel _dataSource;
+        private IGauntletMovie _movie;
+
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+            _dataSource = SubModule.CouncilOverviewViewModel;
+        }
+
+        protected override void OnActivate()
+        {
+            base.OnActivate();
+            _gauntletLayer = new GauntletLayer(100);
+            _movie = _gauntletLayer.LoadMovie("CouncilOverviewView", _dataSource);
+            AddLayer(_gauntletLayer);
+        }
+
+        protected override void OnDeactivate()
+        {
+            base.OnDeactivate();
+            if (_gauntletLayer != null)
+            {
+                RemoveLayer(_gauntletLayer);
+                _gauntletLayer.ReleaseMovie(_movie);
+                _gauntletLayer = null;
+                _movie = null;
+            }
+        }
+
+        protected override void OnFinalize()
+        {
+            base.OnFinalize();
+            _dataSource = null;
+        }
     }
 }

@@ -33,9 +33,9 @@ namespace WarCouncilModern.UI.Screens
             ScreenManager.TrySetFocus(_gauntletLayer);
         }
 
-        protected override void OnFinalize()
+        protected override void OnDeactivate()
         {
-            base.OnFinalize();
+            base.OnDeactivate();
             if (_gauntletLayer != null)
             {
                 RemoveLayer(_gauntletLayer);
@@ -44,9 +44,14 @@ namespace WarCouncilModern.UI.Screens
                     _gauntletLayer.ReleaseMovie(_movie);
                 }
                 _gauntletLayer = null;
+                _movie = null;
             }
+        }
+
+        protected override void OnFinalize()
+        {
+            base.OnFinalize();
             _dataSource = null;
-            _movie = null;
         }
     }
 }
