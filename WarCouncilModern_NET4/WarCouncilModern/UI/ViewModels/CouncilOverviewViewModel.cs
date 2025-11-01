@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using WarCouncilModern.UI.Enums;
 using WarCouncilModern.UI.Services;
+using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.ViewModels
 {
@@ -10,6 +11,18 @@ namespace WarCouncilModern.UI.ViewModels
         private readonly ICouncilUiService _uiService;
 
         public ObservableCollection<CouncilItemViewModel> Councils { get; } = new ObservableCollection<CouncilItemViewModel>();
+
+        private CouncilItemViewModel _selectedCouncil;
+        public CouncilItemViewModel SelectedCouncil
+        {
+            get => _selectedCouncil;
+            private set
+            {
+                _selectedCouncil = value;
+                OnPropertyChanged();
+                // In a real implementation, this would trigger navigation.
+            }
+        }
 
         private OperationState _currentOperation;
         public OperationState CurrentOperation
@@ -33,8 +46,13 @@ namespace WarCouncilModern.UI.ViewModels
                 }
             };
 
-            // This is a simplified way to populate. A real implementation might use commands.
             PopulateCouncils();
+        }
+
+        public void SelectCouncil(CouncilItemViewModel council)
+        {
+            SelectedCouncil = council;
+            // Placeholder for navigation logic to the detail screen
         }
 
         private void PopulateCouncils()
@@ -42,22 +60,21 @@ namespace WarCouncilModern.UI.ViewModels
             Councils.Clear();
             foreach (var dto in _uiService.AllCouncils)
             {
-                Councils.Add(new CouncilItemViewModel(dto));
+                Councils.Add(new CouncilItemViewModel(dto, this));
             }
 
             _uiService.AllCouncils.CollectionChanged += (sender, args) =>
             {
-                // Handle additions and removals to keep the ViewModel in sync
                 if (args.NewItems != null)
                 {
-                    foreach (var newItem in args.NewItems.Cast<Dto.WarCouncilDto>())
+                    foreach (var newItem in args.NewItems.Cast<WarCouncilDto>())
                     {
-                        Councils.Add(new CouncilItemViewModel(newItem));
+                        Councils.Add(new CouncilItemViewModel(newItem, this));
                     }
                 }
                 if (args.OldItems != null)
                 {
-                    foreach (var oldItem in args.OldItems.Cast<Dto.WarCouncilDto>())
+                    foreach (var oldItem in args.OldItems.Cast<WarCouncilDto>())
                     {
                         var vmToRemove = Councils.FirstOrDefault(vm => vm.Id == oldItem.SaveId);
                         if (vmToRemove != null)
