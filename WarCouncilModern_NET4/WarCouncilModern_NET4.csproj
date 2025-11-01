@@ -68,6 +68,15 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="TaleWorlds.Engine.GauntletUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Engine.GauntletUI.dll</HintPath>
+    </Reference>
+    <Reference Include="TaleWorlds.GauntletUI">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.dll</HintPath>
+    </Reference>
+    <Reference Include="TaleWorlds.InputSystem">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.InputSystem.dll</HintPath>
+    </Reference>
     <Reference Include="TaleWorlds.Library">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Library.dll</HintPath>
       <Private>False</Private>
@@ -96,34 +105,47 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.Data.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="TaleWorlds.ScreenSystem">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.ScreenSystem.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <!-- ملفات الكود -->
-    <Compile Include="WarCouncilModern\Core\Services\IAdvisorService.cs" />
-    <Compile Include="WarCouncilModern\Core\Services\ICouncilMeetingService.cs" />
-    <Compile Include="WarCouncilModern\Core\Services\IDecisionProcessingService.cs" />
-    <Compile Include="WarCouncilModern\Core\Services\StubAdvisorService.cs" />
-    <Compile Include="WarCouncilModern\Core\Services\StubCouncilMeetingService.cs" />
-    <Compile Include="WarCouncilModern\Core\Services\StubDecisionProcessingService.cs" />
-    <Compile Include="WarCouncilModern\Core\Settings\IModSettings.cs" />
-    <Compile Include="WarCouncilModern\Core\Settings\StubModSettings.cs" />
-    <Compile Include="WarCouncilModern\Core\State\IModStateTracker.cs" />
-    <Compile Include="WarCouncilModern\Models\Entities\CouncilRole.cs" />
-    <Compile Include="WarCouncilModern\Models\Entities\CouncilStructure.cs" />
-    <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
-    <Compile Include="WarCouncilModern\Utilities\GlobalLog.cs" />
-    <Compile Include="WarCouncilModern\Utilities\Interfaces\IFeatureRegistry.cs" />
+    <Compile Include="WarCouncilModern\Core\Council\DefaultCouncilMemberSelector.cs" />
+    <Compile Include="WarCouncilModern\Core\Council\ICouncilMemberSelector.cs" />
+    <Compile Include="WarCouncilModern\Core\Decisions\ChangeFactionRelationHandler.cs" />
+    <Compile Include="WarCouncilModern\Core\Decisions\IExecutionHandler.cs" />
+    <Compile Include="WarCouncilModern\Core\Decisions\LogExecutionHandler.cs" />
+    <Compile Include="WarCouncilModern\Core\Events\CouncilEvents.cs" />
     <Compile Include="WarCouncilModern\Core\Init\ModuleInitializer.cs" />
     <Compile Include="WarCouncilModern\Core\Init\StartupGuards.cs" />
     <Compile Include="WarCouncilModern\Core\Manager\BehaviorRegistry.cs" />
     <Compile Include="WarCouncilModern\Core\Manager\CampaignContext.cs" />
+    <Compile Include="WarCouncilModern\Core\Manager\WarCouncilManager.cs" />
     <Compile Include="WarCouncilModern\Core\Services\AdvisorService.cs" />
     <Compile Include="WarCouncilModern\Core\Services\CouncilMeetingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\CouncilService.cs" />
     <Compile Include="WarCouncilModern\Core\Services\DecisionProcessingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\IAdvisorService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\ICouncilMeetingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\ICouncilService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\IDecisionProcessingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\IWarDecisionService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubAdvisorService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubCouncilMeetingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\StubDecisionProcessingService.cs" />
+    <Compile Include="WarCouncilModern\Core\Services\WarDecisionService.cs" />
+    <Compile Include="WarCouncilModern\Core\Settings\IModSettings.cs" />
+    <Compile Include="WarCouncilModern\Core\Settings\ModSettings.cs" />
+    <Compile Include="WarCouncilModern\Core\Settings\StubModSettings.cs" />
+    <Compile Include="WarCouncilModern\Core\State\FeatureKeys.cs" />
+    <Compile Include="WarCouncilModern\Core\State\IModStateTracker.cs" />
     <Compile Include="WarCouncilModern\Core\State\ModStateTracker.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\CouncilDecisionBehavior.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\CouncilDiplomacyBehavior.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\CouncilEventBehavior.cs" />
+    <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\WarCouncilCampaignBehavior.cs" />
+    <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\WarCouncilTestBehavior.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Commands\CouncilCommandHandler.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Commands\DebugConsoleCommands.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Events\CouncilEventArgs.cs" />
@@ -131,35 +153,58 @@
     <Compile Include="WarCouncilModern\CouncilSystem\Strategies\DecisionStrategy.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Strategies\DiplomacyStrategy.cs" />
     <Compile Include="WarCouncilModern\CouncilSystem\Strategies\WarPlanStrategy.cs" />
+    <Compile Include="WarCouncilModern\DevTools\DevCouncilPanel.cs" />
     <Compile Include="WarCouncilModern\Initialization\InitHelpers.cs" />
-    <Compile Include="WarCouncilModern\Core\Settings\ModSettings.cs" />
-    <Compile Include="WarCouncilModern\Utilities\Interfaces\IModLogger.cs" />
-    <Compile Include="WarCouncilModern\Utilities\Logging\ModLogger.cs" />
-    <Compile Include="WarCouncilModern\Utilities\ModLogger.cs" />
-    <Compile Include="WarCouncilModern\Utilities\Reflection\ReflectionHelpers.cs" />
     <Compile Include="WarCouncilModern\Initialization\SubModule.cs" />
-    <Compile Include="WarCouncilModern\CouncilSystem\Behaviors\WarCouncilTestBehavior.cs" />
-    <Compile Include="WarCouncilModern\Core\Manager\WarCouncilManager.cs" />
     <Compile Include="WarCouncilModern\Models\DataTransfer\WarCouncilDto.cs" />
     <Compile Include="WarCouncilModern\Models\DataTransfer\WarReportDto.cs" />
-    <Compile Include="WarCouncilModern\Models\Persistence\WarCouncilSaveProfile.cs" />
-    <Compile Include="WarCouncilModern\Models\Persistence\SaveableEtClass1.cs" />
+    <Compile Include="WarCouncilModern\Models\Entities\CouncilRole.cs" />
+    <Compile Include="WarCouncilModern\Models\Entities\CouncilStructure.cs" />
+    <Compile Include="WarCouncilModern\Models\Entities\DecisionExecutionPayload.cs" />
     <Compile Include="WarCouncilModern\Models\Entities\WarCamp.cs" />
     <Compile Include="WarCouncilModern\Models\Entities\WarCouncil.cs" />
     <Compile Include="WarCouncilModern\Models\Entities\WarDecision.cs" />
     <Compile Include="WarCouncilModern\Models\Entities\WarHero.cs" />
     <Compile Include="WarCouncilModern\Models\Entities\WarReport.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarCouncilModern\Models\Persistence\SaveableEtClass1.cs" />
+    <Compile Include="WarCouncilModern\Models\Persistence\WarCouncilSaveProfile.cs" />
     <Compile Include="WarCouncilModern\Save\SaveVersionManager.cs" />
     <Compile Include="WarCouncilModern\Save\WarCouncilSaveDefiner.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarCouncilModern\UI\Commands\DelegateCommand.cs" />
     <Compile Include="WarCouncilModern\UI\Components\UIHelpers.cs" />
     <Compile Include="WarCouncilModern\UI\Dialogues\CouncilDialogueFlow.cs" />
+    <Compile Include="WarCouncilModern\UI\Dto\WarCouncilDto.cs" />
+    <Compile Include="WarCouncilModern\UI\Dto\WarDecisionDto.cs" />
+    <Compile Include="WarCouncilModern\UI\Enums\OperationState.cs" />
+    <Compile Include="WarCouncilModern\UI\Platform\IUiInvoker.cs" />
+    <Compile Include="WarCouncilModern\UI\Platform\UiInvoker.cs" />
+    <Compile Include="WarCouncilModern\UI\Providers\ICouncilProvider.cs" />
+    <Compile Include="WarCouncilModern\UI\Providers\LiveCouncilProvider.cs" />
+    <Compile Include="WarCouncilModern\UI\Providers\MockCouncilProvider.cs" />
     <Compile Include="WarCouncilModern\UI\Screens\CouncilOverviewScreen.cs" />
     <Compile Include="WarCouncilModern\UI\Screens\DecisionDetailScreen.cs" />
+    <Compile Include="WarCouncilModern\UI\Screens\WarCouncilScreen.cs" />
+    <Compile Include="WarCouncilModern\UI\Services\CouncilUiService.cs" />
+    <Compile Include="WarCouncilModern\UI\Services\ICouncilUiService.cs" />
+    <Compile Include="WarCouncilModern\UI\States\WarCouncilState.cs" />
+    <Compile Include="WarCouncilModern\UI\ViewModels\CouncilItemViewModel.cs" />
+    <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionViewModel.cs" />
+    <Compile Include="WarCouncilModern\UI\ViewModels\ViewModelBase.cs" />
+    <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
+    <Compile Include="WarCouncilModern\Utilities\GameApi.cs" />
+    <Compile Include="WarCouncilModern\Utilities\GlobalLog.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Interfaces\IFeatureRegistry.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Interfaces\IGameApi.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Interfaces\IModLogger.cs" />
     <Compile Include="WarCouncilModern\Utilities\Logging\LogFormatter.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Logging\ModLogger.cs" />
+    <Compile Include="WarCouncilModern\Utilities\ModLogger.cs" />
+    <Compile Include="WarCouncilModern\Utilities\Reflection\ReflectionHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="WarCouncilModern\Core\Init\ModuleData.xml" />
     <None Include="WarCouncilModern\docs\ARCHITECTURE.md" />
     <None Include="WarCouncilModern\docs\CHANGELOG.md" />
     <None Include="WarCouncilModern\docs\DEV_GUIDE.md" />
@@ -167,7 +212,6 @@
     <None Include="WarCouncilModern\docs\README_DEV_NOTES.md" />
     <None Include="WarCouncilModern\docs\TEAM_GUIDE.md" />
     <None Include="WarCouncilModern\docs\TEST_PLAN.md" />
-    <None Include="WarCouncilModern\Core\Init\ModuleData.xml" />
     <None Include="WarCouncilModern\Script\DeployDebugLog.ps1" />
     <None Include="WarCouncilModern\Script\PostBuildCopy.ps1" />
     <None Include="WarCouncilModern\tools\CheckBuild.ps1" />
@@ -177,6 +221,12 @@
   <ItemGroup>
     <Folder Include="WarCouncilModern\Core\Utilities\" />
     <Folder Include="WarCouncilModern\examples\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WarCouncilModern\UI\Screens\CouncilDetailView.gauntlet.xml" />
+    <Content Include="WarCouncilModern\UI\Screens\CouncilOverviewView.gauntlet.xml" />
+    <Content Include="WarCouncilModern\UI\Screens\DecisionModalView.gauntlet.xml" />
+    <Content Include="WarCouncilModern\UI\Screens\_GauntletUI.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

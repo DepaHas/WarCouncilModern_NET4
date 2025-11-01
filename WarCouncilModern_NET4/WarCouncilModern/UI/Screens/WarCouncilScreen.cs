@@ -1,13 +1,17 @@
+﻿using TaleWorlds.CampaignSystem;
+using TaleWorlds.Core;
+using TaleWorlds.Engine;
 using TaleWorlds.Engine.GauntletUI;
-using TaleWorlds.Engine.Screens;
+using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.Data;
+using TaleWorlds.ScreenSystem;
 using WarCouncilModern.Initialization;
 using WarCouncilModern.UI.States;
 using WarCouncilModern.UI.ViewModels;
+using WarCouncilModern.UI.Views;
 
 namespace WarCouncilModern.UI.Screens
 {
-    [GameStateScreen(typeof(WarCouncilState))]
     public class WarCouncilScreen : ScreenBase
     {
         private GauntletLayer _gauntletLayer;
