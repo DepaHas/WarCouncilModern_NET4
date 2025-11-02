@@ -78,7 +78,7 @@ namespace WarCouncilModern.Initialization
                     new AdvisorService(Logger),
                     new StubModSettings()
                 );
-                WarCouncilManager = initializer.Manager;
+                WarCouncilManager = initializer.Manager ?? throw new InvalidOperationException("ModuleInitializer failed to initialize WarCouncilManager.");
 
                 GameApi = new GameApi();
                 var memberSelector = new DefaultCouncilMemberSelector(GameApi, Logger);
