@@ -1,8 +1,10 @@
+using System;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.GauntletUI.Data;
 using TaleWorlds.Library;
 using TaleWorlds.ScreenSystem;
+using WarCouncilModern.Initialization;
 using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.States
@@ -23,12 +25,29 @@ namespace WarCouncilModern.UI.States
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _gauntletLayer = new GauntletLayer(100);
-            Game.Current.ScreenManager.AddLayer(_gauntletLayer);
-            _gauntletLayer.IsFocusLayer = true;
-            ScreenManager.TrySetFocus(_gauntletLayer);
 
-            _movie = _gauntletLayer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
+            _gauntletLayer = new GauntletLayer(100);
+
+            if (Game.Current?.ScreenManager != null)
+            {
+                Game.Current.ScreenManager.AddLayer(_gauntletLayer);
+                _gauntletLayer.IsFocusLayer = true;
+                ScreenManager.TrySetFocus(_gauntletLayer);
+
+                try
+                {
+                    _movie = _gauntletLayer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
+                    SubModule.Logger.Info("WarCouncilState: Movie loaded successfully.");
+                }
+                catch (Exception ex)
+                {
+                    SubModule.Logger.Error("WarCouncilState: Failed to load movie", ex);
+                }
+            }
+            else
+            {
+                SubModule.Logger.Warn("WarCouncilState: ScreenManager is null during OnInitialize.");
+            }
         }
 
         protected override void OnFinalize()

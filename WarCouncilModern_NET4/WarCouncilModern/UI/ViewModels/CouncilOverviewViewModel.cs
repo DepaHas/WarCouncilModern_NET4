@@ -1,73 +1,80 @@
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Collections.ObjectModel;
 using TaleWorlds.Library;
-using WarCouncilModern.UI.Commands;
-using WarCouncilModern.UI.Services;
+using WarCouncilModern.Initialization;
 
 namespace WarCouncilModern.UI.ViewModels
 {
     public class CouncilOverviewViewModel : ViewModel
     {
-        private readonly ICouncilUiService _councilUiService;
+        private bool _isLoading;
+        private string _title = string.Empty;
+        private DecisionViewModel? _selectedDecision;
+
+        public ObservableCollection<DecisionViewModel> Decisions { get; } = new();
 
         [DataSourceProperty]
-        public MBBindingList<DecisionViewModel> Decisions { get; }
-
-        [DataSourceProperty]
-        public bool IsLoading { get; set; }
-
-        [DataSourceProperty]
-        public string Title { get; set; }
-
-        public ICommand ProposeCommand { get; }
-        public ICommand RefreshCommand { get; }
-        public ICommand OpenDetailCommand { get; }
-
-        public CouncilOverviewViewModel(ICouncilUiService councilUiService)
+        public bool IsLoading
         {
-            _councilUiService = councilUiService;
-            Decisions = new MBBindingList<DecisionViewModel>();
-            Title = "War Council Overview";
-
-            ProposeCommand = new DelegateCommand(_ => Propose());
-            RefreshCommand = new DelegateCommand(async _ => await RefreshAsync());
-            OpenDetailCommand = new DelegateCommand(OpenDetail);
-        }
-
-        private void Propose()
-        {
-            // Logic to open proposal modal will be here
-        }
-
-        private void OpenDetail(object? param)
-        {
-            if (param is DecisionViewModel decision)
+            get => _isLoading;
+            set
             {
-                // Logic to open detail view for the decision
+                if (_isLoading != value)
+                {
+                    _isLoading = value;
+                    OnPropertyChangedWithValue(value, nameof(IsLoading));
+                }
             }
         }
 
-        public async Task InitializeAsync()
+        [DataSourceProperty]
+        public string Title
         {
-            await RefreshAsync();
+            get => _title;
+            set
+            {
+                if (_title != value)
+                {
+                    _title = value;
+                    OnPropertyChangedWithValue(value, nameof(Title));
+                }
+            }
         }
 
-        public async Task RefreshAsync()
+        [DataSourceProperty]
+        public DecisionViewModel? SelectedDecision
         {
-            IsLoading = true;
-            Decisions.Clear();
+            get => _selectedDecision;
+            set
+            {
+                if (_selectedDecision != value)
+                {
+                    _selectedDecision = value;
+                    OnPropertyChangedWithValue(value, nameof(SelectedDecision));
+                }
+            }
+        }
 
-            await Task.Delay(500); // Simulate network latency
+        public MBBindingCommand ProposeCommand { get; }
+        public MBBindingCommand RefreshCommand { get; }
+        public MBBindingCommand OpenDetailCommand { get; }
+
+        public CouncilOverviewViewModel()
+        {
+            Title = "War Council Overview";
+            ProposeCommand = new MBBindingCommand(OnPropose);
+            RefreshCommand = new MBBindingCommand(OnRefresh);
+            OpenDetailCommand = new MBBindingCommand(OnOpenDetail);
 
 #if DEBUG
-            // Populate with mock data in DEBUG mode
-            Decisions.Add(new DecisionViewModel { Id = "1", Title = "Declare War on Vlandia", Description = "Vlandia's expansion must be stopped.", VotesFor = 5, VotesAgainst = 2 });
-            Decisions.Add(new DecisionViewModel { Id = "2", Title = "Enact Defensive Pact with Battania", Description = "An alliance will secure our western border.", VotesFor = 7, VotesAgainst = 0 });
-            Decisions.Add(new DecisionViewModel { Id = "3", Title = "Increase Noble Levies", Description = "We need more troops for the upcoming campaign.", VotesFor = 3, VotesAgainst = 4 });
+            // Mock data for development
+            Decisions.Add(new DecisionViewModel { Title = "Declare War", Description = "Proposal to declare war on Western Empire." });
+            Decisions.Add(new DecisionViewModel { Title = "Trade Pact", Description = "Negotiate a trade pact with Battania." });
+            Decisions.Add(new DecisionViewModel { Title = "Raise Army", Description = "Summon the vassals for a campaign." });
 #endif
-
-            IsLoading = false;
         }
+
+        private void OnPropose() => SubModule.Logger.Info("ProposeCommand triggered.");
+        private void OnRefresh() => SubModule.Logger.Info("RefreshCommand triggered.");
+        private void OnOpenDetail() => SubModule.Logger.Info("OpenDetailCommand triggered.");
     }
 }
