@@ -30,7 +30,7 @@ namespace WarCouncilModern.Core.Decisions
             }
 
             var targetFactionId = payload.TargetFactionId;
-            var targetFaction = _gameApi.FindFactionById(targetFactionId);
+            var targetFaction = _gameApi.FindFactionById(targetFactionId!);
             if (targetFaction == null)
             {
                 _logger.Warn($"[ChangeFactionRelationHandler] councilId={councilId} decisionId={decisionId} proposerId={proposerId} Execution failed: Target faction not found (targetFactionId='{targetFactionId}').");

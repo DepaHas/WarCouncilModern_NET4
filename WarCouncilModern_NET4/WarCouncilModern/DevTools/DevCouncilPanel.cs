@@ -26,10 +26,13 @@ namespace WarCouncilModern.DevTools
             _logger.Info("[DevPanel] Commands: CreateCouncil(kingdom), ProposeDecision(councilId, title, desc, payload), CastVote(councilId, decisionId, vote), TallyDecision(councilId, decisionId)");
         }
 
-        public WarCouncil CreateCouncil(Kingdom kingdom)
+        public WarCouncil? CreateCouncil(Kingdom kingdom)
         {
             var council = _councilService.StartCouncilForKingdom(kingdom);
-            _logger.Info($"[DevPanel] Created council {council.SaveId} for kingdom {kingdom.StringId}");
+            if (council != null)
+            {
+                _logger.Info($"[DevPanel] Created council {council.SaveId} for kingdom {kingdom.StringId}");
+            }
             return council;
         }
 
