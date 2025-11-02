@@ -23,7 +23,7 @@ namespace WarCouncilModern.Core.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public WarCouncil StartCouncilForKingdom(Kingdom kingdom)
+        public WarCouncil? StartCouncilForKingdom(Kingdom kingdom)
         {
             if (kingdom == null)
             {
