@@ -5,13 +5,13 @@
     <Children>
         <Widget Width="100%" Height="100%" LayoutMethod="Vertical">
             <!-- Header: Decision Title -->
-            <TextWidget Width="100%" Height="60" Text="@Title" Brush="Header.Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextWidget Width="100%" Height="60" Text="{Binding Title}" Brush="Header.Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
             <!-- Separator -->
             <BrushWidget Width="90%" Height="2" Brush="DefaultBrush" Color="#CCCCCCFF" HorizontalAlignment="Center" />
 
             <!-- Body: Decision Description -->
-            <TextWidget Width="90%" Height="*%" MarginTop="20" Text="@Description" Brush="Body.Text" HorizontalAlignment="Center" />
+            <TextWidget Width="90%" Height="*%" MarginTop="20" Text="{Binding Description}" Brush="Body.Text" HorizontalAlignment="Center" />
 
             <!-- Footer Buttons -->
             <Widget Width="100%" Height="100" LayoutMethod="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">

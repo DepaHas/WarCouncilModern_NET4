@@ -44,7 +44,6 @@ namespace WarCouncilModern.Initialization
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
-
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
@@ -67,8 +66,13 @@ namespace WarCouncilModern.Initialization
         {
             base.OnGameStart(game, gameStarterObject);
 
-            if (game.GameType is Campaign)
+            if (game.GameType is not Campaign)
+                return;
+
+            try
             {
+                Logger.Info("Initializing WarCouncilModern SubModule...");
+
                 var gameStarter = (CampaignGameStarter)gameStarterObject;
                 var behavior = new WarCouncilCampaignBehavior();
                 gameStarter.AddBehavior(behavior);
@@ -84,7 +88,7 @@ namespace WarCouncilModern.Initialization
                     new CouncilMeetingService(Logger),
                     new DecisionProcessingService(Logger),
                     new AdvisorService(Logger),
-                    new StubModSettings()
+                    _settings
                 );
                 WarCouncilManager = initializer.Manager ?? throw new InvalidOperationException("ModuleInitializer failed to initialize WarCouncilManager.");
 
@@ -106,82 +110,74 @@ namespace WarCouncilModern.Initialization
                 UiInvoker = new UiInvoker(uiScheduler);
                 CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
-                CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
+                CouncilOverviewViewModel = new CouncilOverviewViewModel();
 
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
                 CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
             }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed during SubModule initialization", ex);
+            }
         }
 
-        private void OnSessionLaunched(CampaignGameStarter gameStarter)
+        private async void OnSessionLaunched(CampaignGameStarter starter)
         {
-            UiInvoker.InvokeOnUi(async () =>
+            if (_settings == null) return;
+            try
             {
-                try
-                {
-                    if (!CouncilUiService.IsInitialized)
-                    {
-                        await CouncilUiService.InitializeAsync();
-                    }
+                if (!_settings.EnableCouncilUI && !_settings.EnableCouncilDevTools)
+                    return;
 
-                    if (_settings != null && (_settings.EnableCouncilUI || _settings.EnableCouncilDevTools))
-                    {
-                        await Task.Delay(1000); // Allow some time for the game UI to settle
-                        Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
-                        Logger.Info("WarCouncilState pushed to the game state manager.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("OnSessionLaunched: Exception while initializing or pushing WarCouncilState.", ex);
-                }
-            });
-        }
+                Logger.Info("OnSessionLaunched: Preparing to open WarCouncil UI...");
 
-        protected override void OnBeforeInitialModuleScreenSetAsRoot()
-        {
-            base.OnBeforeInitialModuleScreenSetAsRoot();
-            // Temporary: Push our custom screen for testing purposes
-            if (Game.Current != null && CouncilOverviewViewModel != null)
+                await CouncilUiService.InitializeAsync();
+
+                const int maxAttempts = 10;
+                int attempts = 0;
+                while ((Game.Current == null || Game.Current.GameStateManager == null) && attempts++ < maxAttempts)
+                    await Task.Delay(200);
+
+                if (Game.Current?.GameStateManager == null)
+                {
+                    Logger.Warn("GameStateManager not ready — skipping WarCouncilState push.");
+                    return;
+                }
+
+                Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
+                Logger.Info("WarCouncilState pushed successfully.");
+            }
+            catch (Exception ex)
             {
-                Logger.Info("Pushing WarCouncilScreen for testing.");
-                // This needs to be called after the main screen is set, otherwise it might get popped.
-                // A better approach would be to hook into the map screen activation.
-                // For now, let's just initialize the service to start loading data.
-                _ = CouncilUiService.InitializeAsync();
-
-                // Then, a console command or a temporary button would push the state.
-                // Forcing it here is problematic. Let's assume a dev command will do:
-                // `war_council.open_screen` which executes Game.Current.GameStateManager.PushState(...)
+                Logger.Error("Error during OnSessionLaunched execution", ex);
             }
         }
 
         protected override void OnSubModuleUnloaded()
         {
+            base.OnSubModuleUnloaded();
             try
             {
-                Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
+                Logger.Info("SubModule unloading — cleaning up WarCouncilModern...");
+
+                CampaignEvents.OnSessionLaunchedEvent.RemoveNonSerializedListener(this, OnSessionLaunched);
+
                 CouncilUiService?.Dispose();
+
+                CouncilUiService = null!;
             }
             catch (Exception ex)
             {
-                try { Logger.Error("SubModule.OnSubModuleUnloaded exception", ex); } catch { }
-            }
-            finally
-            {
-                base.OnSubModuleUnloaded();
+                Logger.Error("Error during SubModule unload", ex);
             }
         }
 
-        // ... (rest of the file is unchanged)
         private void RegisterSaveDefinerSafely()
         {
             try
             {
                 var definer = new WarCouncilSaveDefiner();
-
-                // Try SaveTypeRegistry.Instance.AddTypeDefiner(definer)
                 var registryType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeRegistry, TaleWorlds.SaveSystem");
                 if (registryType != null)
                 {
@@ -198,8 +194,6 @@ namespace WarCouncilModern.Initialization
                         }
                     }
                 }
-
-                // Fallback to static SaveTypeDefiner.AddTypeDefiner(definer)
                 var definerType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeDefiner, TaleWorlds.SaveSystem");
                 var addStatic = definerType?.GetMethod("AddTypeDefiner", BindingFlags.Static | BindingFlags.Public);
                 if (addStatic != null)
@@ -208,9 +202,7 @@ namespace WarCouncilModern.Initialization
                     Logger.Info("WarCouncilSaveDefiner registered via SaveTypeDefiner.AddTypeDefiner fallback.");
                     return;
                 }
-
-                // If neither approach available, log a warning
-                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner for this TaleWorlds.SaveSystem version.");
+                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner.");
             }
             catch (Exception ex)
             {
