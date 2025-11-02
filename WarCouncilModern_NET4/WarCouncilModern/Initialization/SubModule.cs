@@ -74,8 +74,9 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        public override void InitializeGameStarter(Game game, IGameStarter gameStarterObject)
+        protected internal override void InitializeGameStarter(Game game, IGameStarter gameStarterObject)
         {
+            base.InitializeGameStarter(game, gameStarterObject);
             if (game.GameType is Campaign)
             {
                 var gameStarter = (CampaignGameStarter)gameStarterObject;
