@@ -4,6 +4,7 @@ using HarmonyLib;
 using TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
+using TaleWorlds.Localization;
 using WarCouncilModern.Initialization;
 using WarCouncilModern.UI.ViewModels.Kingdom;
 
