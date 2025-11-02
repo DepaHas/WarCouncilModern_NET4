@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.GauntletUI.UIExtender;
@@ -39,7 +40,7 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilProvider CouncilProvider { get; private set; } = null!;
         internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
-        private IModSettings? _settings;
+        internal static IModSettings? _settings;
 
         protected override void OnSubModuleLoad()
         {
@@ -47,11 +48,13 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
+                new Harmony("com.warcouncilmodern.mod").PatchAll();
                 RegisterSaveDefinerSafely();
 
                 UIResourceManager.Register("WarCouncil.CouncilOverview", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilOverview.xml");
                 UIResourceManager.Register("WarCouncil.CouncilDetail", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilDetail.xml");
                 UIResourceManager.Register("WarCouncil.DecisionModal", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.DecisionModal.xml");
+                UIResourceManager.Register("KingdomWarCouncil", "WarCouncilModern/GUI/Prefabs/Council/KingdomWarCouncil.xml");
                 Logger.Info("Registered custom UI resources.");
 
                 Logger.Info("SubModule loaded successfully.");
@@ -130,23 +133,8 @@ namespace WarCouncilModern.Initialization
                 if (!_settings.EnableCouncilUI && !_settings.EnableCouncilDevTools)
                     return;
 
-                Logger.Info("OnSessionLaunched: Preparing to open WarCouncil UI...");
-
+                Logger.Info("OnSessionLaunched: Initializing Council UI Service...");
                 await CouncilUiService.InitializeAsync();
-
-                const int maxAttempts = 10;
-                int attempts = 0;
-                while ((Game.Current == null || Game.Current.GameStateManager == null) && attempts++ < maxAttempts)
-                    await Task.Delay(200);
-
-                if (Game.Current?.GameStateManager == null)
-                {
-                    Logger.Warn("GameStateManager not ready — skipping WarCouncilState push.");
-                    return;
-                }
-
-                Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
-                Logger.Info("WarCouncilState pushed successfully.");
             }
             catch (Exception ex)
             {
