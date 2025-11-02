@@ -25,7 +25,7 @@ namespace WarCouncilModern.UI.ViewModels
             OpenCouncilDetailCommand = new DelegateCommand(ExecuteOpenCouncilDetail);
         }
 
-        private void ExecuteOpenCouncilDetail(object obj)
+        private void ExecuteOpenCouncilDetail(object? obj)
         {
             _parent.SelectCouncil(this);
         }

@@ -15,7 +15,7 @@ namespace WarCouncilModern.Core.Council
             _logger = logger;
         }
 
-        public IEnumerable<string> GetMembersForCouncil(string kingdomStringId, CouncilContext context = null)
+        public IEnumerable<string> GetMembersForCouncil(string kingdomStringId, CouncilContext? context = null)
         {
             var result = new List<string>();
             var ruler = _gameApi.GetRulerHeroForKingdom(kingdomStringId);

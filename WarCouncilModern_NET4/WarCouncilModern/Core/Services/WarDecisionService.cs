@@ -37,7 +37,7 @@ namespace WarCouncilModern.Core.Services
             {
                 if (!string.IsNullOrWhiteSpace(executionPayload))
                 {
-                    decision.ExecutionPayload = new DecisionExecutionPayload { RawPayload = executionPayload };
+                    decision.ExecutionPayload = new DecisionExecutionPayload { RawPayload = executionPayload! };
                 }
 
                 CouncilEvents.RaiseDecisionProposed(council, decision);
