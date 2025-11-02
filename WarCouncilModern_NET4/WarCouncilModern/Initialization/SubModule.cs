@@ -41,6 +41,7 @@ namespace WarCouncilModern.Initialization
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
         internal static IModSettings? _settings;
         private Harmony? _harmony;
+        private WarCouncilCampaignBehavior? _warCouncilCampaignBehavior;
 
         protected override void OnSubModuleLoad()
         {
@@ -73,6 +74,16 @@ namespace WarCouncilModern.Initialization
             }
         }
 
+        public override void InitializeGameStarter(Game game, IGameStarter gameStarterObject)
+        {
+            if (game.GameType is Campaign)
+            {
+                var gameStarter = (CampaignGameStarter)gameStarterObject;
+                _warCouncilCampaignBehavior = new WarCouncilCampaignBehavior();
+                gameStarter.AddBehavior(_warCouncilCampaignBehavior);
+            }
+        }
+
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
         {
             base.OnGameStart(game, gameStarterObject);
@@ -84,15 +95,11 @@ namespace WarCouncilModern.Initialization
             {
                 Logger.Info("Initializing WarCouncilModern SubModule...");
 
-                var gameStarter = (CampaignGameStarter)gameStarterObject;
-                var behavior = new WarCouncilCampaignBehavior();
-                gameStarter.AddBehavior(behavior);
-
                 _settings = new ModSettings(); // Use ModSettings, not Stub
                 var featureRegistry = new FeatureRegistry(_settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
-                    behavior,
+                    _warCouncilCampaignBehavior,
                     featureRegistry,
                     Logger,
                     new ModStateTracker(Logger),
@@ -126,6 +133,7 @@ namespace WarCouncilModern.Initialization
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
                 CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
+
             }
             catch (Exception ex)
             {
