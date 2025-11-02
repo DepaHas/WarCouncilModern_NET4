@@ -5,14 +5,19 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
+using TaleWorlds.Core;
+using TaleWorlds.GauntletUI;
+using TaleWorlds.ScreenSystem;
 using WarCouncilModern.Core.Events;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
+using WarCouncilModern.Initialization;
 using WarCouncilModern.Models.Entities;
 using WarCouncilModern.UI.Dto;
 using WarCouncilModern.UI.Enums;
 using WarCouncilModern.UI.Platform;
 using WarCouncilModern.UI.Providers;
+using WarCouncilModern.UI.States;
 using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.UI.Services
@@ -34,6 +39,8 @@ namespace WarCouncilModern.UI.Services
             get => _currentOperation;
             private set { _currentOperation = value; OnPropertyChanged(nameof(CurrentOperation)); }
         }
+
+        public bool IsInitialized { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -68,6 +75,19 @@ namespace WarCouncilModern.UI.Services
             });
 
             CurrentOperation = OperationState.None;
+            IsInitialized = true;
+        }
+
+        public void OpenOverviewScreen()
+        {
+            if (SubModule.CouncilOverviewViewModel == null)
+            {
+                _logger.Error("Cannot open council screen: CouncilOverviewViewModel is null.");
+                return;
+            }
+
+            _logger.Info("Pushing WarCouncilState to open the overview screen.");
+            Game.Current.GameStateManager.PushState(new WarCouncilState(SubModule.CouncilOverviewViewModel));
         }
 
         public async Task ProposeDecisionAsync(Guid councilId, string title, string description, string payload, CancellationToken cancellationToken = default)
