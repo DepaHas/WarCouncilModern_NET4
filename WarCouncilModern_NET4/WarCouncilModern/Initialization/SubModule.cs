@@ -1,11 +1,10 @@
 using System;
+using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
-using TaleWorlds.GauntletUI.UIExtender;
 using TaleWorlds.MountAndBlade;
 using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Council;
@@ -41,6 +40,7 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
         internal static IModSettings? _settings;
+        private Harmony? _harmony;
 
         protected override void OnSubModuleLoad()
         {
@@ -48,7 +48,15 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
-                new Harmony("com.warcouncilmodern.mod").PatchAll();
+
+                _harmony = new Harmony("com.warcouncilmodern.kingdomtab");
+                _harmony.PatchAll();
+                Logger.Info("Harmony patches applied (WarCouncilModern).");
+
+                var asm = AppDomain.CurrentDomain.GetAssemblies()
+                           .FirstOrDefault(a => a.GetName().Name?.IndexOf("Harmony", StringComparison.OrdinalIgnoreCase) >= 0);
+                Logger.Info(asm != null ? $"Harmony loaded from: {asm.Location}" : "Harmony not found among loaded assemblies.");
+
                 RegisterSaveDefinerSafely();
 
                 UIResourceManager.Register("WarCouncil.CouncilOverview", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilOverview.xml");
@@ -61,7 +69,7 @@ namespace WarCouncilModern.Initialization
             }
             catch (Exception ex)
             {
-                try { Logger.Error("SubModule.OnSubModuleLoad exception", ex); } catch { }
+                Logger.Error("Failed to apply Harmony patches.", ex);
             }
         }
 
@@ -80,7 +88,7 @@ namespace WarCouncilModern.Initialization
                 var behavior = new WarCouncilCampaignBehavior();
                 gameStarter.AddBehavior(behavior);
 
-                _settings = new StubModSettings();
+                _settings = new ModSettings(); // Use ModSettings, not Stub
                 var featureRegistry = new FeatureRegistry(_settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
@@ -144,20 +152,28 @@ namespace WarCouncilModern.Initialization
 
         protected override void OnSubModuleUnloaded()
         {
-            base.OnSubModuleUnloaded();
             try
             {
                 Logger.Info("SubModule unloading — cleaning up WarCouncilModern...");
 
+                if (_harmony != null)
+                {
+                    _harmony.UnpatchAll("com.warcouncilmodern.kingdomtab");
+                    Logger.Info("Harmony patches removed (WarCouncilModern).");
+                    _harmony = null;
+                }
+
                 CampaignEvents.OnSessionLaunchedEvent.RemoveNonSerializedListener(this, OnSessionLaunched);
-
                 CouncilUiService?.Dispose();
-
                 CouncilUiService = null!;
             }
             catch (Exception ex)
             {
-                Logger.Error("Error during SubModule unload", ex);
+                Logger.Error("Error while removing Harmony patches", ex);
+            }
+            finally
+            {
+                base.OnSubModuleUnloaded();
             }
         }
 
