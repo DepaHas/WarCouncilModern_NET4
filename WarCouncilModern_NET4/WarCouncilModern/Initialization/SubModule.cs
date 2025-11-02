@@ -1,44 +1,45 @@
+using HarmonyLib;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
-using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Council;
 using WarCouncilModern.Core.Decisions;
+using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Core.State;
+using WarCouncilModern.CouncilSystem.Behaviors;
 using WarCouncilModern.DevTools;
+using WarCouncilModern.Save;
 using WarCouncilModern.UI;
 using WarCouncilModern.UI.Platform;
 using WarCouncilModern.UI.Providers;
 using WarCouncilModern.UI.Services;
-using WarCouncilModern.UI.ViewModels;
 using WarCouncilModern.UI.States;
+using WarCouncilModern.UI.ViewModels;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
-using WarCouncilModern.Save;
-using WarCouncilModern.CouncilSystem.Behaviors;
 
 namespace WarCouncilModern.Initialization
 {
     public class SubModule : MBSubModuleBase
     {
         internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
-        internal static IWarCouncilManager WarCouncilManager { get; private set; } = null!;
-        internal static ICouncilService CouncilService { get; private set; } = null!;
-        internal static IWarDecisionService WarDecisionService { get; private set; } = null!;
-        internal static IGameApi GameApi { get; private set; } = null!;
-        internal static DevCouncilPanel DevPanel { get; private set; } = null!;
-        internal static IUiInvoker UiInvoker { get; private set; } = null!;
-        internal static ICouncilProvider CouncilProvider { get; private set; } = null!;
-        internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
-        internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
+        internal static IWarCouncilManager? WarCouncilManager { get; private set; }
+        internal static ICouncilService? CouncilService { get; private set; }
+        internal static IWarDecisionService? WarDecisionService { get; private set; }
+        internal static IGameApi? GameApi { get; private set; }
+        internal static DevCouncilPanel? DevPanel { get; private set; }
+        internal static IUiInvoker? UiInvoker { get; private set; }
+        internal static ICouncilProvider? CouncilProvider { get; private set; }
+        internal static ICouncilUiService? CouncilUiService { get; private set; }
+        internal static CouncilOverviewViewModel? CouncilOverviewViewModel { get; private set; }
         internal static IModSettings? _settings;
         private Harmony? _harmony;
         private WarCouncilCampaignBehavior? _warCouncilCampaignBehavior;
@@ -60,28 +61,12 @@ namespace WarCouncilModern.Initialization
 
                 RegisterSaveDefinerSafely();
 
-                UIResourceManager.Register("WarCouncil.CouncilOverview", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilOverview.xml");
-                UIResourceManager.Register("WarCouncil.CouncilDetail", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilDetail.xml");
-                UIResourceManager.Register("WarCouncil.DecisionModal", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.DecisionModal.xml");
-                UIResourceManager.Register("KingdomWarCouncil", "WarCouncilModern/GUI/Prefabs/Council/KingdomWarCouncil.xml");
-                Logger.Info("Registered custom UI resources.");
-
+                // Note: UI resources are loaded directly inside WarCouncilState (Gauntlet), do not Register here.
                 Logger.Info("SubModule loaded successfully.");
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to apply Harmony patches.", ex);
-            }
-        }
-
-        protected internal override void InitializeGameStarter(Game game, IGameStarter gameStarterObject)
-        {
-            base.InitializeGameStarter(game, gameStarterObject);
-            if (game.GameType is Campaign)
-            {
-                var gameStarter = (CampaignGameStarter)gameStarterObject;
-                _warCouncilCampaignBehavior = new WarCouncilCampaignBehavior();
-                gameStarter.AddBehavior(_warCouncilCampaignBehavior);
             }
         }
 
@@ -96,7 +81,7 @@ namespace WarCouncilModern.Initialization
             {
                 Logger.Info("Initializing WarCouncilModern SubModule...");
 
-                _settings = new ModSettings(); // Use ModSettings, not Stub
+                _settings ??= new ModSettings();
                 var featureRegistry = new FeatureRegistry(_settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
@@ -125,16 +110,15 @@ namespace WarCouncilModern.Initialization
                 CouncilProvider = new LiveCouncilProvider(WarCouncilManager);
 #endif
 
-                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                var uiScheduler = SynchronizationContext.Current != null ? TaskScheduler.FromCurrentSynchronizationContext() : TaskScheduler.Default;
                 UiInvoker = new UiInvoker(uiScheduler);
                 CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
-                CouncilOverviewViewModel = new CouncilOverviewViewModel();
+                CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
 
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
-                CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
-
+                CampaignEvents.OnSessionLaunchedEvent.AddListener(OnSessionLaunched);
             }
             catch (Exception ex)
             {
@@ -144,14 +128,60 @@ namespace WarCouncilModern.Initialization
 
         private async void OnSessionLaunched(CampaignGameStarter starter)
         {
-            if (_settings == null) return;
             try
             {
+                if (_warCouncilCampaignBehavior == null)
+                {
+                    _warCouncilCampaignBehavior = new WarCouncilCampaignBehavior();
+                    starter.AddBehavior(_warCouncilCampaignBehavior);
+                    Logger.Info("WarCouncilCampaignBehavior added on session launch.");
+                }
+
+                if (_settings == null)
+                {
+                    Logger.Info("Settings not initialized; skipping UI initialization.");
+                    return;
+                }
+
                 if (!_settings.EnableCouncilUI && !_settings.EnableCouncilDevTools)
                     return;
 
+                if (CouncilUiService == null)
+                {
+                    Logger.Warn("CouncilUiService is null; aborting UI initialization.");
+                    return;
+                }
+
                 Logger.Info("OnSessionLaunched: Initializing Council UI Service...");
                 await CouncilUiService.InitializeAsync();
+
+                int attempts = 0;
+                while ((Game.Current?.GameStateManager == null) && attempts++ < 10)
+                    await Task.Delay(200);
+
+                if (Game.Current?.GameStateManager == null)
+                {
+                    Logger.Warn("GameStateManager not ready; skipping WarCouncilState push.");
+                    return;
+                }
+
+                if (CouncilOverviewViewModel == null)
+                {
+                    Logger.Warn("CouncilOverviewViewModel is null; cannot push WarCouncilState.");
+                    return;
+                }
+
+                try
+                {
+                    Game.Current.GameStateManager.PushState(new WarCouncilModern.UI.States.WarCouncilState(CouncilOverviewViewModel));
+                    Logger.Info("WarCouncilState pushed successfully.");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Failed to push WarCouncilState", ex);
+                }
+
+                CampaignEvents.OnSessionLaunchedEvent.RemoveListener(OnSessionLaunched);
             }
             catch (Exception ex)
             {
@@ -172,9 +202,19 @@ namespace WarCouncilModern.Initialization
                     _harmony = null;
                 }
 
-                CampaignEvents.OnSessionLaunchedEvent.RemoveNonSerializedListener(this, OnSessionLaunched);
+                CampaignEvents.OnSessionLaunchedEvent.RemoveListener(OnSessionLaunched);
                 CouncilUiService?.Dispose();
-                CouncilUiService = null!;
+                CouncilUiService = null;
+
+                CouncilOverviewViewModel = null;
+                DevPanel = null;
+                WarCouncilManager = null;
+                CouncilService = null;
+                WarDecisionService = null;
+                GameApi = null;
+                UiInvoker = null;
+                CouncilProvider = null;
+                _settings = null;
             }
             catch (Exception ex)
             {
