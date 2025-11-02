@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using TaleWorlds.Library;
+using WarCouncilModern.UI.Commands;
 
 namespace WarCouncilModern.UI.ViewModels
 {
@@ -66,13 +67,13 @@ namespace WarCouncilModern.UI.ViewModels
             }
         }
 
-        public MBBindingCommand VoteYesCommand { get; }
-        public MBBindingCommand VoteNoCommand { get; }
+        public DelegateCommand VoteYesCommand { get; }
+        public DelegateCommand VoteNoCommand { get; }
 
         public DecisionViewModel()
         {
-            VoteYesCommand = new MBBindingCommand(OnVoteYes);
-            VoteNoCommand = new MBBindingCommand(OnVoteNo);
+            VoteYesCommand = new DelegateCommand(_ => OnVoteYes());
+            VoteNoCommand = new DelegateCommand(_ => OnVoteNo());
         }
 
         private void OnVoteYes() => VotesFor++;

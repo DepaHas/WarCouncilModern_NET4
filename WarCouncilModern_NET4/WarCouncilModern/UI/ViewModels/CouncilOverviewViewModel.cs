@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using TaleWorlds.Library;
 using WarCouncilModern.Initialization;
+using WarCouncilModern.UI.Commands;
 
 namespace WarCouncilModern.UI.ViewModels
 {
@@ -54,16 +55,16 @@ namespace WarCouncilModern.UI.ViewModels
             }
         }
 
-        public MBBindingCommand ProposeCommand { get; }
-        public MBBindingCommand RefreshCommand { get; }
-        public MBBindingCommand OpenDetailCommand { get; }
+        public DelegateCommand ProposeCommand { get; }
+        public DelegateCommand RefreshCommand { get; }
+        public DelegateCommand OpenDetailCommand { get; }
 
         public CouncilOverviewViewModel()
         {
             Title = "War Council Overview";
-            ProposeCommand = new MBBindingCommand(OnPropose);
-            RefreshCommand = new MBBindingCommand(OnRefresh);
-            OpenDetailCommand = new MBBindingCommand(OnOpenDetail);
+            ProposeCommand = new DelegateCommand(_ => OnPropose());
+            RefreshCommand = new DelegateCommand(_ => OnRefresh());
+            OpenDetailCommand = new DelegateCommand(OnOpenDetail);
 
 #if DEBUG
             // Mock data for development
@@ -75,6 +76,6 @@ namespace WarCouncilModern.UI.ViewModels
 
         private void OnPropose() => SubModule.Logger.Info("ProposeCommand triggered.");
         private void OnRefresh() => SubModule.Logger.Info("RefreshCommand triggered.");
-        private void OnOpenDetail() => SubModule.Logger.Info("OpenDetailCommand triggered.");
+        private void OnOpenDetail(object? obj) => SubModule.Logger.Info("OpenDetailCommand triggered.");
     }
 }
