@@ -1,89 +1,73 @@
-using System.Collections.ObjectModel;
-using System.Linq;
-using WarCouncilModern.UI.Enums;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using TaleWorlds.Library;
+using WarCouncilModern.UI.Commands;
 using WarCouncilModern.UI.Services;
-using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : ViewModelBase
+    public class CouncilOverviewViewModel : ViewModel
     {
-        private readonly ICouncilUiService _uiService;
+        private readonly ICouncilUiService _councilUiService;
 
-        public ObservableCollection<CouncilItemViewModel> Councils { get; } = new ObservableCollection<CouncilItemViewModel>();
+        [DataSourceProperty]
+        public MBBindingList<DecisionViewModel> Decisions { get; }
 
-        private CouncilItemViewModel? _selectedCouncil;
-        public CouncilItemViewModel? SelectedCouncil
+        [DataSourceProperty]
+        public bool IsLoading { get; set; }
+
+        [DataSourceProperty]
+        public string Title { get; set; }
+
+        public ICommand ProposeCommand { get; }
+        public ICommand RefreshCommand { get; }
+        public ICommand OpenDetailCommand { get; }
+
+        public CouncilOverviewViewModel(ICouncilUiService councilUiService)
         {
-            get => _selectedCouncil;
-            private set
+            _councilUiService = councilUiService;
+            Decisions = new MBBindingList<DecisionViewModel>();
+            Title = "War Council Overview";
+
+            ProposeCommand = new DelegateCommand(_ => Propose());
+            RefreshCommand = new DelegateCommand(async _ => await RefreshAsync());
+            OpenDetailCommand = new DelegateCommand(OpenDetail);
+        }
+
+        private void Propose()
+        {
+            // Logic to open proposal modal will be here
+        }
+
+        private void OpenDetail(object? param)
+        {
+            if (param is DecisionViewModel decision)
             {
-                _selectedCouncil = value;
-                OnPropertyChanged();
-                // In a real implementation, this would trigger navigation.
+                // Logic to open detail view for the decision
             }
         }
 
-        private OperationState _currentOperation;
-        public OperationState CurrentOperation
+        public async Task InitializeAsync()
         {
-            get => _currentOperation;
-            private set
-            {
-                _currentOperation = value;
-                OnPropertyChanged();
-            }
+            await RefreshAsync();
         }
 
-        public CouncilOverviewViewModel(ICouncilUiService uiService)
+        public async Task RefreshAsync()
         {
-            _uiService = uiService;
-            _uiService.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(ICouncilUiService.CurrentOperation))
-                {
-                    CurrentOperation = _uiService.CurrentOperation;
-                }
-            };
+            IsLoading = true;
+            Decisions.Clear();
 
-            PopulateCouncils();
-        }
+            await Task.Delay(500); // Simulate network latency
 
-        public void SelectCouncil(CouncilItemViewModel council)
-        {
-            SelectedCouncil = council;
-            // Placeholder for navigation logic to the detail screen
-        }
+#if DEBUG
+            // Populate with mock data in DEBUG mode
+            Decisions.Add(new DecisionViewModel { Id = "1", Title = "Declare War on Vlandia", Description = "Vlandia's expansion must be stopped.", VotesFor = 5, VotesAgainst = 2 });
+            Decisions.Add(new DecisionViewModel { Id = "2", Title = "Enact Defensive Pact with Battania", Description = "An alliance will secure our western border.", VotesFor = 7, VotesAgainst = 0 });
+            Decisions.Add(new DecisionViewModel { Id = "3", Title = "Increase Noble Levies", Description = "We need more troops for the upcoming campaign.", VotesFor = 3, VotesAgainst = 4 });
+#endif
 
-        private void PopulateCouncils()
-        {
-            Councils.Clear();
-            foreach (var dto in _uiService.AllCouncils)
-            {
-                Councils.Add(new CouncilItemViewModel(dto, this));
-            }
-
-            _uiService.AllCouncils.CollectionChanged += (sender, args) =>
-            {
-                if (args.NewItems != null)
-                {
-                    foreach (var newItem in args.NewItems.Cast<WarCouncilDto>())
-                    {
-                        Councils.Add(new CouncilItemViewModel(newItem, this));
-                    }
-                }
-                if (args.OldItems != null)
-                {
-                    foreach (var oldItem in args.OldItems.Cast<WarCouncilDto>())
-                    {
-                        var vmToRemove = Councils.FirstOrDefault(vm => vm.Id == oldItem.SaveId);
-                        if (vmToRemove != null)
-                        {
-                            Councils.Remove(vmToRemove);
-                        }
-                    }
-                }
-            };
+            IsLoading = false;
         }
     }
 }

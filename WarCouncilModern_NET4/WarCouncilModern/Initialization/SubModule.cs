@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
+using TaleWorlds.GauntletUI.UIExtender;
 using TaleWorlds.MountAndBlade;
 using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Council;
@@ -38,6 +39,7 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilProvider CouncilProvider { get; private set; } = null!;
         internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
+        private IModSettings? _settings;
 
         protected override void OnSubModuleLoad()
         {
@@ -47,6 +49,12 @@ namespace WarCouncilModern.Initialization
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
                 RegisterSaveDefinerSafely();
+
+                UIResourceManager.Register("WarCouncil.CouncilOverview", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilOverview.xml");
+                UIResourceManager.Register("WarCouncil.CouncilDetail", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilDetail.xml");
+                UIResourceManager.Register("WarCouncil.DecisionModal", "WarCouncilModern/GUI/Prefabs/Council/WarCouncil.DecisionModal.xml");
+                Logger.Info("Registered custom UI resources.");
+
                 Logger.Info("SubModule loaded successfully.");
             }
             catch (Exception ex)
@@ -65,8 +73,8 @@ namespace WarCouncilModern.Initialization
                 var behavior = new WarCouncilCampaignBehavior();
                 gameStarter.AddBehavior(behavior);
 
-                var settings = new StubModSettings();
-                var featureRegistry = new FeatureRegistry(settings);
+                _settings = new StubModSettings();
+                var featureRegistry = new FeatureRegistry(_settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
                     behavior,
@@ -101,7 +109,34 @@ namespace WarCouncilModern.Initialization
                 CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
 
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
+
+                CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
             }
+        }
+
+        private void OnSessionLaunched(CampaignGameStarter gameStarter)
+        {
+            UiInvoker.InvokeOnUi(async () =>
+            {
+                try
+                {
+                    if (!CouncilUiService.IsInitialized)
+                    {
+                        await CouncilUiService.InitializeAsync();
+                    }
+
+                    if (_settings != null && (_settings.EnableCouncilUI || _settings.EnableCouncilDevTools))
+                    {
+                        await Task.Delay(1000); // Allow some time for the game UI to settle
+                        Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
+                        Logger.Info("WarCouncilState pushed to the game state manager.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("OnSessionLaunched: Exception while initializing or pushing WarCouncilState.", ex);
+                }
+            });
         }
 
         protected override void OnBeforeInitialModuleScreenSetAsRoot()

@@ -1,0 +1,44 @@
+<Widget Width="100%" Height="100%">
+    <!-- Background -->
+    <BrushWidget Width="100%" Height="100%" Brush="DefaultBrush" />
+
+    <Children>
+        <Widget Width="100%" Height="100%" LayoutMethod="Vertical">
+            <!-- Header -->
+            <TextWidget Width="100%" Height="60" Text="@Title" Brush="Header.Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <!-- Separator -->
+            <BrushWidget Width="90%" Height="2" Brush="DefaultBrush" Color="#CCCCCCFF" HorizontalAlignment="Center" />
+
+            <!-- Decision List -->
+            <ListPanel Width="95%" Height="70%" MarginTop="10" DataSource="{Decisions}" HorizontalAlignment="Center">
+                <ItemTemplate>
+                    <ButtonWidget Width="100%" Height="50" MarginBottom="5" Command.Click="OpenDetailCommand" CommandParameter="{Binding}" Brush="Button.Default">
+                        <Children>
+                            <TextWidget Width="100%" Height="100%" Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Children>
+                    </ButtonWidget>
+                </ItemTemplate>
+            </ListPanel>
+
+            <!-- Loading Indicator -->
+            <Widget Width="100" Height="100" IsVisible="@IsLoading" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextWidget Text="Loading..." HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Widget>
+
+            <!-- Footer Buttons -->
+            <Widget Width="100%" Height="100" LayoutMethod="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <ButtonWidget Width="200" Height="50" MarginLeft="10" MarginRight="10" Command.Click="ProposeCommand" Brush="Button.PrimaryAction">
+                    <Children>
+                        <TextWidget Text="Propose" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Children>
+                </ButtonWidget>
+                <ButtonWidget Width="200" Height="50" MarginLeft="10" MarginRight="10" Command.Click="RefreshCommand" Brush="Button.SecondaryAction">
+                    <Children>
+                        <TextWidget Text="Refresh" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Children>
+                </ButtonWidget>
+            </Widget>
+        </Widget>
+    </Children>
+</Widget>
