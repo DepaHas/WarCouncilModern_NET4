@@ -1,0 +1,29 @@
+<Widget Width="600" Height="400" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <!-- Background -->
+    <BrushWidget Width="100%" Height="100%" Brush="DefaultBrush" />
+
+    <Children>
+        <Widget Width="100%" Height="100%" LayoutMethod="Vertical">
+            <!-- Header -->
+            <TextWidget Width="100%" Height="60" Text="Propose New Decision" Brush="Header.Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <!-- Input Fields -->
+            <EditableTextWidget Width="90%" Height="40" MarginTop="20" Text="{Binding ProposalTitle}" Brush="EditableText.Default" HorizontalAlignment="Center" />
+            <EditableTextWidget Width="90%" Height="150" MarginTop="10" Text="{Binding ProposalDescription}" Brush="EditableText.Default" HorizontalAlignment="Center" />
+
+            <!-- Footer Buttons -->
+            <Widget Width="100%" Height="80" LayoutMethod="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <ButtonWidget Width="200" Height="50" MarginLeft="10" MarginRight="10" Command.Click="SubmitCommand" Brush="Button.PrimaryAction">
+                    <Children>
+                        <TextWidget Text="Submit" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Children>
+                </ButtonWidget>
+                <ButtonWidget Width="200" Height="50" MarginLeft="10" MarginRight="10" Command.Click="CancelCommand" Brush="Button.SecondaryAction">
+                    <Children>
+                        <TextWidget Text="Cancel" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Children>
+                </ButtonWidget>
+            </Widget>
+        </Widget>
+    </Children>
+</Widget>

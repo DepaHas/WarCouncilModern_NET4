@@ -1,28 +1,30 @@
+using HarmonyLib;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
-using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Council;
 using WarCouncilModern.Core.Decisions;
+using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Core.State;
+using WarCouncilModern.CouncilSystem.Behaviors;
 using WarCouncilModern.DevTools;
+using WarCouncilModern.Save;
 using WarCouncilModern.UI;
 using WarCouncilModern.UI.Platform;
 using WarCouncilModern.UI.Providers;
 using WarCouncilModern.UI.Services;
-using WarCouncilModern.UI.ViewModels;
 using WarCouncilModern.UI.States;
+using WarCouncilModern.UI.ViewModels;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
-using WarCouncilModern.Save;
-using WarCouncilModern.CouncilSystem.Behaviors;
 
 namespace WarCouncilModern.Initialization
 {
@@ -43,16 +45,26 @@ namespace WarCouncilModern.Initialization
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
-
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
+
+                _harmony = new Harmony("com.warcouncilmodern.kingdomtab");
+                _harmony.PatchAll();
+                Logger.Info("Harmony patches applied (WarCouncilModern).");
+
+                var asm = AppDomain.CurrentDomain.GetAssemblies()
+                           .FirstOrDefault(a => a.GetName().Name?.IndexOf("Harmony", StringComparison.OrdinalIgnoreCase) >= 0);
+                Logger.Info(asm != null ? $"Harmony loaded from: {asm.Location}" : "Harmony not found among loaded assemblies.");
+
                 RegisterSaveDefinerSafely();
+
+                // Note: UI resources are loaded directly inside WarCouncilState (Gauntlet), do not Register here.
                 Logger.Info("SubModule loaded successfully.");
             }
             catch (Exception ex)
             {
-                try { Logger.Error("SubModule.OnSubModuleLoad exception", ex); } catch { }
+                Logger.Error("Failed to apply Harmony patches.", ex);
             }
         }
 
@@ -60,17 +72,18 @@ namespace WarCouncilModern.Initialization
         {
             base.OnGameStart(game, gameStarterObject);
 
-            if (game.GameType is Campaign)
+            if (game.GameType is not Campaign)
+                return;
+
+            try
             {
-                var gameStarter = (CampaignGameStarter)gameStarterObject;
-                var behavior = new WarCouncilCampaignBehavior();
-                gameStarter.AddBehavior(behavior);
+                Logger.Info("Initializing WarCouncilModern SubModule...");
 
                 _settings = new StubModSettings();
                 var featureRegistry = new FeatureRegistry(_settings);
                 var initializer = new ModuleInitializer();
                 initializer.Initialize(
-                    behavior,
+                    _warCouncilCampaignBehavior,
                     featureRegistry,
                     Logger,
                     new ModStateTracker(Logger),
@@ -95,7 +108,7 @@ namespace WarCouncilModern.Initialization
                 CouncilProvider = new LiveCouncilProvider(WarCouncilManager);
 #endif
 
-                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                var uiScheduler = SynchronizationContext.Current != null ? TaskScheduler.FromCurrentSynchronizationContext() : TaskScheduler.Default;
                 UiInvoker = new UiInvoker(uiScheduler);
                 CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
@@ -114,10 +127,21 @@ namespace WarCouncilModern.Initialization
                 Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
                 CampaignEvents.OnSessionLaunchedEvent.RemoveListeners(this);
                 CouncilUiService?.Dispose();
+                CouncilUiService = null;
+
+                CouncilOverviewViewModel = null;
+                DevPanel = null;
+                WarCouncilManager = null;
+                CouncilService = null;
+                WarDecisionService = null;
+                GameApi = null;
+                UiInvoker = null;
+                CouncilProvider = null;
+                _settings = null;
             }
             catch (Exception ex)
             {
-                try { Logger.Error("SubModule.OnSubModuleUnloaded exception", ex); } catch { }
+                Logger.Error("Error while removing Harmony patches", ex);
             }
             finally
             {

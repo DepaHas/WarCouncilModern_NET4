@@ -9,7 +9,7 @@ using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.States
 {
-    public class WarCouncilState : GameState
+    public class WarCouncilState : TaleWorlds.Core.GameState
     {
         private GauntletLayer? _gauntletLayer;
         private IGauntletMovie? _movie;

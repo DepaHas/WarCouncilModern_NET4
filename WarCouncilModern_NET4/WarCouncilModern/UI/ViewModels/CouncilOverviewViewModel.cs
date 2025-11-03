@@ -1,53 +1,34 @@
 using System.Collections.ObjectModel;
-using System.Linq;
-using WarCouncilModern.UI.Enums;
+using TaleWorlds.Library;
 using WarCouncilModern.UI.Services;
+using WarCouncilModern.UI.Commands;
 using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : ViewModelBase
+    public class CouncilOverviewViewModel : TaleWorlds.Library.ViewModel
     {
         private readonly ICouncilUiService _uiService;
-
-        public ObservableCollection<CouncilItemViewModel> Councils { get; } = new ObservableCollection<CouncilItemViewModel>();
-
-        private CouncilItemViewModel? _selectedCouncil;
-        public CouncilItemViewModel? SelectedCouncil
-        {
-            get => _selectedCouncil;
-            private set
-            {
-                _selectedCouncil = value;
-                OnPropertyChanged();
-                // In a real implementation, this would trigger navigation.
-            }
-        }
-
-        private OperationState _currentOperation;
-        public OperationState CurrentOperation
-        {
-            get => _currentOperation;
-            private set
-            {
-                _currentOperation = value;
-                OnPropertyChanged();
-            }
-        }
 
         public CouncilOverviewViewModel(ICouncilUiService uiService)
         {
             _uiService = uiService;
-            _uiService.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(ICouncilUiService.CurrentOperation))
-                {
-                    CurrentOperation = _uiService.CurrentOperation;
-                }
-            };
-
-            PopulateCouncils();
+            ProposeCommand = new DelegateCommand(async _ => await _uiService.ExecuteProposeNewDecision(), _ => _uiService.CanProposeNewDecision);
         }
+
+        public override void RefreshValues()
+        {
+            base.RefreshValues();
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(Decisions));
+        }
+
+        [DataSourceProperty]
+        public string Title => "War Council Overview";
+
+        [DataSourceProperty]
+        public bool IsLoading => _uiService.IsLoading;
 
         public void SelectCouncil(CouncilItemViewModel item)
         {
@@ -55,35 +36,13 @@ namespace WarCouncilModern.UI.ViewModels
             Logger?.Info($"Council selected: {item?.Name}");
         }
 
-        private void PopulateCouncils()
-        {
-            Councils.Clear();
-            foreach (var dto in _uiService.AllCouncils)
-            {
-                Councils.Add(new CouncilItemViewModel(dto, this));
-            }
+        public DelegateCommand ProposeCommand { get; }
+        public DelegateCommand CloseCommand => new DelegateCommand(_ => OnClose());
 
-            _uiService.AllCouncils.CollectionChanged += (sender, args) =>
-            {
-                if (args.NewItems != null)
-                {
-                    foreach (var newItem in args.NewItems.Cast<WarCouncilDto>())
-                    {
-                        Councils.Add(new CouncilItemViewModel(newItem, this));
-                    }
-                }
-                if (args.OldItems != null)
-                {
-                    foreach (var oldItem in args.OldItems.Cast<WarCouncilDto>())
-                    {
-                        var vmToRemove = Councils.FirstOrDefault(vm => vm.Id == oldItem.SaveId);
-                        if (vmToRemove != null)
-                        {
-                            Councils.Remove(vmToRemove);
-                        }
-                    }
-                }
-            };
+        private void OnClose()
+        {
+            // Logic to close the screen
         }
+
     }
 }

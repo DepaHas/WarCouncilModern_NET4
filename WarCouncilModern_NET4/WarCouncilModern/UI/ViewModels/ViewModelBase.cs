@@ -5,7 +5,8 @@ using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class ViewModelBase : ViewModel
+    // الكلاس الأساسي لـ ViewModels يرث مباشرة من كلاس اللعبة
+    public abstract class ViewModelBase : ViewModel
     {
         protected static readonly IModLogger Logger = SubModule.Logger;
 
@@ -14,5 +15,6 @@ namespace WarCouncilModern.UI.ViewModels
         {
             base.OnPropertyChanged(propertyName);
         }
+
     }
 }
