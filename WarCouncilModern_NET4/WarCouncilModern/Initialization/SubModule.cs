@@ -126,7 +126,7 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        private async void OnSessionLaunched(CampaignGameStarter starter)
+        private async void OnGameLoaded(CampaignGameStarter starter)
         {
             try
             {
