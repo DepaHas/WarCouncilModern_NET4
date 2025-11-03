@@ -1,75 +1,77 @@
-using System;
+﻿using System;
+using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
-using TaleWorlds.Library;
-using TaleWorlds.ScreenSystem;
-using WarCouncilModern.Initialization;
+using TaleWorlds.GauntletUI;
+using TaleWorlds.GauntletUI.Data;
+using TaleWorlds.MountAndBlade;
 using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.States
 {
-    public class WarCouncilState : GameState
+    public class WarCouncilState : TaleWorlds.Core.GameState
     {
         private GauntletLayer? _gauntletLayer;
-        private object? _movie;
-        private readonly CouncilOverviewViewModel _viewModel;
-
-        public override bool IsMenuState => true;
+        private IGauntletMovie? _movie;
+        private CouncilOverviewViewModel _viewModel;
 
         public WarCouncilState(CouncilOverviewViewModel viewModel)
         {
-            _viewModel = viewModel;
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         }
 
         protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            _gauntletLayer = new GauntletLayer(100, "GauntletLayer");
-            _gauntletLayer.IsFocusLayer = true;
-            AddLayer(_gauntletLayer);
-            ScreenManager.TrySetFocus(_gauntletLayer);
 
+        {
             try
             {
-                // Use reflection to call LoadMovie, which now returns GauntletMovie
-                var loadMovieMethod = typeof(GauntletLayer).GetMethod("LoadMovie", new[] { typeof(string), typeof(ViewModel) });
-                if (loadMovieMethod != null)
+                _gauntletLayer = new GauntletLayer(0);
+                // Load movie directly from XML prefab; returns IGauntletMovie in newer APIs
+                _movie = _gauntletLayer.LoadMovie("WarCouncilModern/GUI/Prefabs/Council/WarCouncil.CouncilOverview.xml", _viewModel)?.Movie;
+                if (_movie != null)
                 {
-                    _movie = loadMovieMethod.Invoke(_gauntletLayer, new object[] { "CouncilOverviewScreen", _viewModel });
-                    SubModule.Logger.Info("WarCouncilState: Movie loaded successfully via reflection.");
+                    _gauntletLayer.AddMovie(_movie);
                 }
-                else
+
+                // Push layer via ScreenManager or ScreenBase API
+                var screenManagerType = Type.GetType("TaleWorlds.Engine.ScreenManager, TaleWorlds.Engine")
+                                     ?? Type.GetType("TaleWorlds.MountAndBlade.ScreenManager, TaleWorlds.MountAndBlade");
+                if (screenManagerType != null)
                 {
-                    SubModule.Logger.Error("WarCouncilState: LoadMovie method not found via reflection.");
+                    // If Game has ScreenManager property accessible via Game.Current, try to add layer
+                    var gm = Game.Current;
+                    var prop = gm?.GetType().GetProperty("ScreenManager");
+                    var screenManager = prop?.GetValue(gm);
+                    if (screenManager != null)
+                    {
+                        var addLayer = screenManager.GetType().GetMethod("AddLayer");
+                        addLayer?.Invoke(screenManager, new object[] { _gauntletLayer });
+                    }
                 }
+
+                 base.OnInitialize();
             }
             catch (Exception ex)
             {
-                SubModule.Logger.Error("WarCouncilState: Failed to load movie via reflection", ex);
+                WarCouncilModern.Initialization.SubModule.Logger?.Error("WarCouncilState initialization failed", ex);
+                
             }
         }
 
         protected override void OnFinalize()
+
         {
-            base.OnFinalize();
-            if (_gauntletLayer != null)
+            try
             {
                 if (_movie != null)
                 {
-                    // Use reflection to call ReleaseMovie
-                    var releaseMovieMethod = typeof(GauntletLayer).GetMethod("ReleaseMovie", new[] { _movie.GetType() });
-                    if (releaseMovieMethod != null)
-                    {
-                        releaseMovieMethod.Invoke(_gauntletLayer, new[] { _movie });
-                        SubModule.Logger.Info("WarCouncilState: Movie released successfully via reflection.");
-                    }
-                    else
-                    {
-                         SubModule.Logger.Error("WarCouncilState: ReleaseMovie method not found via reflection.");
-                    }
+                    _gauntletLayer?.RemoveMovie(_movie);
                     _movie = null;
                 }
-                RemoveLayer(_gauntletLayer);
-                _gauntletLayer = null;
+                base.OnFinalize();
+            }
+            catch (Exception ex)
+            {
+                WarCouncilModern.Initialization.SubModule.Logger?.Error("WarCouncilState finalize failed", ex);
             }
         }
     }
