@@ -1,48 +1,49 @@
 using System.Collections.ObjectModel;
+using TaleWorlds.Core.ViewModelCollection;
 using TaleWorlds.Library;
-using WarCouncilModern.UI.Services;
+using TaleWorlds.Localization;
 using WarCouncilModern.UI.Commands;
-using WarCouncilModern.UI.Dto;
+using WarCouncilModern.UI.Services;
+using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : TaleWorlds.Library.ViewModel
+    public class CouncilOverviewViewModel : ViewModelBase
     {
         private readonly ICouncilUiService _uiService;
+        private CouncilItemViewModel? _selectedCouncil;
+
+        [DataSourceProperty]
+        public string Title { get; }
+
+        [DataSourceProperty]
+        public ObservableCollection<CouncilItemViewModel> Decisions { get; set; }
+
+        [DataSourceProperty]
+        public CouncilItemViewModel? SelectedCouncil
+        {
+            get => _selectedCouncil;
+            set
+            {
+                if (value != _selectedCouncil)
+                {
+                    _selectedCouncil = value;
+                    OnPropertyChangedWithValue(value, nameof(SelectedCouncil));
+                }
+            }
+        }
 
         public CouncilOverviewViewModel(ICouncilUiService uiService)
         {
             _uiService = uiService;
-            ProposeCommand = new DelegateCommand(async _ => await _uiService.ExecuteProposeNewDecision(), _ => _uiService.CanProposeNewDecision);
+            Title = new TextObject("{=WC_OverviewTitle}War Council Overview").ToString();
+            Decisions = new ObservableCollection<CouncilItemViewModel>();
         }
-
-        public override void RefreshValues()
-        {
-            base.RefreshValues();
-            OnPropertyChanged(nameof(Title));
-            OnPropertyChanged(nameof(IsLoading));
-            OnPropertyChanged(nameof(Decisions));
-        }
-
-        [DataSourceProperty]
-        public string Title => "War Council Overview";
-
-        [DataSourceProperty]
-        public bool IsLoading => _uiService.IsLoading;
 
         public void SelectCouncil(CouncilItemViewModel item)
         {
             SelectedCouncil = item;
             Logger?.Info($"Council selected: {item?.Name}");
         }
-
-        public DelegateCommand ProposeCommand { get; }
-        public DelegateCommand CloseCommand => new DelegateCommand(_ => OnClose());
-
-        private void OnClose()
-        {
-            // Logic to close the screen
-        }
-
     }
 }

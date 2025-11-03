@@ -1,7 +1,6 @@
 using System;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
-using TaleWorlds.GauntletUI.Data;
 using TaleWorlds.Library;
 using TaleWorlds.ScreenSystem;
 using WarCouncilModern.Initialization;
@@ -9,10 +8,10 @@ using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.States
 {
-    public class WarCouncilState : TaleWorlds.Core.GameState
+    public class WarCouncilState : GameState
     {
         private GauntletLayer? _gauntletLayer;
-        private IGauntletMovie? _movie;
+        private GauntletMovieIdentifier? _movie;
         private readonly CouncilOverviewViewModel _viewModel;
 
         public override bool IsMenuState => true;
@@ -27,8 +26,12 @@ namespace WarCouncilModern.UI.States
             base.OnInitialize();
             _gauntletLayer = new GauntletLayer(100, "GauntletLayer");
             _gauntletLayer.IsFocusLayer = true;
-            ScreenManager.Instance.AddLayer(_gauntletLayer);
-            ScreenManager.TrySetFocus(_gauntletLayer);
+
+            if (Game.Current?.ScreenManager != null)
+            {
+                Game.Current.ScreenManager.AddLayer(_gauntletLayer);
+                ScreenManager.TrySetFocus(_gauntletLayer);
+            }
 
             try
             {
@@ -48,10 +51,14 @@ namespace WarCouncilModern.UI.States
             {
                 if (_movie != null)
                 {
-                    _gauntletLayer.ReleaseMovie(_movie);
-                    _movie = null!;
+                    _gauntletLayer.UnloadMovie(_movie);
+                    _movie = null;
                 }
-                ScreenManager.Instance.RemoveLayer(_gauntletLayer);
+
+                if (Game.Current?.ScreenManager != null)
+                {
+                    Game.Current.ScreenManager.RemoveLayer(_gauntletLayer);
+                }
                 _gauntletLayer = null;
             }
         }
