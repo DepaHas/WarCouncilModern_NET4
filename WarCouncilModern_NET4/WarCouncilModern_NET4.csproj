@@ -51,10 +51,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- مراجع النظام -->
-    <Reference Include="0Harmony, Version=2.3.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WarCouncilModern\libs\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -68,9 +64,6 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="TaleWorlds.CampaignSystem.ViewModelCollection">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.ViewModelCollection.dll</HintPath>
-    </Reference>
     <Reference Include="TaleWorlds.Core">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
       <Private>False</Private>
@@ -80,9 +73,6 @@
     </Reference>
     <Reference Include="TaleWorlds.GauntletUI">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.dll</HintPath>
-    </Reference>
-    <Reference Include="TaleWorlds.GauntletUI.PrefabSystem">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.PrefabSystem.dll</HintPath>
     </Reference>
     <Reference Include="TaleWorlds.InputSystem">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.InputSystem.dll</HintPath>
@@ -121,7 +111,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- ملفات الكود -->
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WarCouncilModern\Core\Council\DefaultCouncilMemberSelector.cs" />
     <Compile Include="WarCouncilModern\Core\Council\ICouncilMemberSelector.cs" />
     <Compile Include="WarCouncilModern\Core\Decisions\ChangeFactionRelationHandler.cs" />
@@ -179,9 +168,9 @@
     <Compile Include="WarCouncilModern\Models\Entities\WarReport.cs" />
     <Compile Include="WarCouncilModern\Models\Persistence\SaveableEtClass1.cs" />
     <Compile Include="WarCouncilModern\Models\Persistence\WarCouncilSaveProfile.cs" />
-    <Compile Include="WarCouncilModern\Patches\KingdomManagementVMPatch.cs" />
     <Compile Include="WarCouncilModern\Save\SaveVersionManager.cs" />
     <Compile Include="WarCouncilModern\Save\WarCouncilSaveDefiner.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WarCouncilModern\UI\Commands\DelegateCommand.cs" />
     <Compile Include="WarCouncilModern\UI\Components\UIHelpers.cs" />
     <Compile Include="WarCouncilModern\UI\Dialogues\CouncilDialogueFlow.cs" />
@@ -202,8 +191,6 @@
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilItemViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionDetailViewModel.cs" />
-    <Compile Include="WarCouncilModern\UI\ViewModels\DecisionViewModel.cs" />
-    <Compile Include="WarCouncilModern\UI\ViewModels\Kingdom\KingdomWarCouncilVM.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\ViewModelBase.cs" />
     <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
     <Compile Include="WarCouncilModern\Utilities\GameApi.cs" />
@@ -217,10 +204,6 @@
     <Compile Include="WarCouncilModern\Utilities\Reflection\ReflectionHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="WarCouncilModern\Core\Utilities\" />
-    <Folder Include="WarCouncilModern\examples\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="WarCouncilModern\Core\Init\ModuleData.xml" />
     <None Include="WarCouncilModern\docs\ARCHITECTURE.md" />
     <None Include="WarCouncilModern\docs\CHANGELOG.md" />
@@ -229,8 +212,6 @@
     <None Include="WarCouncilModern\docs\README_DEV_NOTES.md" />
     <None Include="WarCouncilModern\docs\TEAM_GUIDE.md" />
     <None Include="WarCouncilModern\docs\TEST_PLAN.md" />
-    <None Include="WarCouncilModern\github\workflows\build-x64.yml" />
-    <None Include="WarCouncilModern\github\workflows\PULL_REQUEST_TEMPLATE.md" />
     <None Include="WarCouncilModern\Script\DeployDebugLog.ps1" />
     <None Include="WarCouncilModern\Script\PostBuildCopy.ps1" />
     <None Include="WarCouncilModern\tools\CheckBuild.ps1" />
@@ -238,12 +219,10 @@
     <None Include="WarCouncilModern\tools\PostBuildCopy.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="WarCouncilModern\GUI\Prefabs\Council\KingdomWarCouncil.xml" />
-    <Content Include="WarCouncilModern\GUI\Prefabs\Council\WarCouncil.CouncilDetail.xml" />
-    <Content Include="WarCouncilModern\GUI\Prefabs\Council\WarCouncil.CouncilOverview.xml" />
-    <Content Include="WarCouncilModern\GUI\Prefabs\Council\WarCouncil.DecisionModal.xml" />
-    <Content Include="WarCouncilModern\libs\0Harmony.dll" />
-    <Content Include="WarCouncilModern\libs\Bannerlord.Harmony.dll" />
+    <Folder Include="WarCouncilModern\Core\Utilities\" />
+    <Folder Include="WarCouncilModern\examples\" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="WarCouncilModern\UI\Screens\CouncilDetailView.gauntlet.xml" />
     <Content Include="WarCouncilModern\UI\Screens\CouncilOverviewView.gauntlet.xml" />
     <Content Include="WarCouncilModern\UI\Screens\DecisionModalView.gauntlet.xml" />

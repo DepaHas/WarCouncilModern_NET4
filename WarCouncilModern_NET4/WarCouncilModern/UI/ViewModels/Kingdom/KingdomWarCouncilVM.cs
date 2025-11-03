@@ -1,24 +1,24 @@
+using System;
+using TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement;
+using TaleWorlds.Core;
 using TaleWorlds.Library;
-using WarCouncilModern.Initialization;
-using WarCouncilModern.UI.Commands;
+using TaleWorlds.Localization;
 
 namespace WarCouncilModern.UI.ViewModels.Kingdom
 {
-    public class KingdomWarCouncilVM : ViewModel
+    public class KingdomWarCouncilVM : KingdomCategoryVM
     {
-        public DelegateCommand OpenWarCouncilCommand { get; }
-
-        public KingdomWarCouncilVM()
+        public KingdomWarCouncilVM(Action<KingdomCategoryVM> onSelect, KingdomManagementVM kingdomManagement)
+            : base(new TextObject("War Council"), kingdomManagement, onSelect, false)
         {
-            OpenWarCouncilCommand = new DelegateCommand(ExecuteOpenWarCouncil);
+            // The base constructor handles most of the work.
+            // We can add specific logic here if needed.
         }
 
-        private void ExecuteOpenWarCouncil(object? obj)
+        public override void RefreshValues()
         {
-            // This command will be bound to a button in the XML.
-            // When clicked, it will open the main War Council screen.
-            SubModule.CouncilUiService?.OpenOverviewScreen();
-            SubModule.Logger.Info("OpenWarCouncilCommand executed from Kingdom screen tab.");
+            base.RefreshValues();
+            // Additional refresh logic here.
         }
     }
 }

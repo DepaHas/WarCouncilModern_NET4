@@ -182,5 +182,71 @@ namespace WarCouncilModern.Utilities.Reflection
         /// </summary>
         public static List<T> SafeToList<T>(IEnumerable<T>? source) =>
             source != null ? source.ToList() : new List<T>();
+
+        public static bool TryAddSessionHandler<T>(T handler, object listener, string methodName) where T : class
+        {
+            var methodInfo = listener.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (methodInfo == null)
+            {
+                GlobalLog.Instance.Warn($"[ReflectionHelper] Method '{methodName}' not found on '{listener.GetType().FullName}'.");
+                return false;
+            }
+
+            // Priority 1: Try AddAction<T>(Action<T>)
+            var addActionMethod = handler.GetType().GetMethod("AddAction", new[] { typeof(Action<>).MakeGenericType(methodInfo.GetParameters().Select(p => p.ParameterType).ToArray()) });
+            if (addActionMethod != null)
+            {
+                var action = Delegate.CreateDelegate(addActionMethod.GetParameters()[0].ParameterType, listener, methodInfo);
+                addActionMethod.Invoke(handler, new object[] { action });
+                GlobalLog.Instance.Info($"[ReflectionHelper] Successfully registered '{methodName}' via AddAction.");
+                return true;
+            }
+
+            // Priority 2: Try AddNonSerializedListener(object, Action<...>)
+            var addNonSerializedListener = handler.GetType().GetMethod("AddNonSerializedListener");
+            if (addNonSerializedListener != null)
+            {
+                var actionType = addNonSerializedListener.GetParameters()[1].ParameterType;
+                var action = Delegate.CreateDelegate(actionType, listener, methodInfo);
+                addNonSerializedListener.Invoke(handler, new[] { listener, action });
+                GlobalLog.Instance.Info($"[ReflectionHelper] Successfully registered '{methodName}' via AddNonSerializedListener.");
+                return true;
+            }
+
+            // Priority 3: Try Add(Action<...>)
+            var addMethod = handler.GetType().GetMethod("Add");
+             if (addMethod != null)
+            {
+                var actionType = addMethod.GetParameters()[0].ParameterType;
+                var action = Delegate.CreateDelegate(actionType, listener, methodInfo);
+                addMethod.Invoke(handler, new object[] { action });
+                GlobalLog.Instance.Info($"[ReflectionHelper] Successfully registered '{methodName}' via Add.");
+                return true;
+            }
+
+            GlobalLog.Instance.Error($"[ReflectionHelper] Failed to find a compatible registration method for '{methodName}'.");
+            return false;
+        }
+
+        public static bool TryRemoveSessionHandler<T>(T handler, object listener, string methodName) where T : class
+        {
+            var methodInfo = listener.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (methodInfo == null)
+            {
+                GlobalLog.Instance.Warn($"[ReflectionHelper] Method '{methodName}' not found on '{listener.GetType().FullName}'.");
+                return false;
+            }
+
+            var removeNonSerializedListener = handler.GetType().GetMethod("RemoveNonSerializedListener");
+            if (removeNonSerializedListener != null)
+            {
+                removeNonSerializedListener.Invoke(handler, new[] { listener });
+                GlobalLog.Instance.Info($"[ReflectionHelper] Successfully removed listener for '{methodName}' via RemoveNonSerializedListener.");
+                return true;
+            }
+
+            GlobalLog.Instance.Error($"[ReflectionHelper] Failed to find a compatible removal method for '{methodName}'.");
+            return false;
+        }
     }
 }

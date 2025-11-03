@@ -1,56 +1,47 @@
 using System;
+using System.Linq;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement;
-using TaleWorlds.Core;
 using TaleWorlds.Library;
-using TaleWorlds.Localization;
 using WarCouncilModern.Initialization;
 using WarCouncilModern.UI.ViewModels.Kingdom;
+using WarCouncilModern.Utilities.Reflection;
 
 namespace WarCouncilModern.Patches
 {
-    [HarmonyPatch(typeof(KingdomManagementVM), MethodType.Constructor)]
+    [HarmonyPatch(typeof(KingdomManagementVM), "OnInitialize")]
     public static class KingdomManagementVMPatch
     {
-        public static void Postfix(KingdomManagementVM __instance, Action<KingdomItemVM> ____onItemSelection, Action ____onClose)
+        public static void Postfix(KingdomManagementVM __instance)
         {
-            if (SubModule._settings == null || !SubModule._settings.EnableCouncilUI)
-            {
-                return;
-            }
-
             try
             {
-                var kingdomItemVMs = __instance.KingdomItemVMs;
-                if (kingdomItemVMs == null)
+                var categories = ReflectionHelpers.GetPropertyValue<MBBindingList<KingdomCategoryVM>>(__instance, "Categories");
+                if (categories == null)
                 {
-                    SubModule.Logger.Warn("KingdomManagementVMPatch: KingdomItemVMs is null.");
+                    SubModule.Logger.Warn("[WarCouncil] Could not find 'Categories' property on KingdomManagementVM.");
                     return;
                 }
 
-                foreach (var item in kingdomItemVMs)
+                if (categories.Any(c => c is KingdomWarCouncilVM))
                 {
-                    if (item.Identifier == "WarCouncil")
-                    {
-                        return;
-                    }
+                    return; // Already added.
                 }
 
-                var warCouncilVm = new KingdomWarCouncilVM();
-                var warCouncilItem = new KingdomItemVM(
-                    "WarCouncil",
-                    new TextObject("War Council"),
-                    warCouncilVm,
-                    ____onItemSelection,
-                    ____onClose
-                );
+                var onCategorySelect = ReflectionHelpers.GetFieldValue<Action<KingdomCategoryVM>>(__instance, "_onCategorySelect");
+                if (onCategorySelect == null)
+                {
+                     SubModule.Logger.Warn("[WarCouncil] Could not find '_onCategorySelect' action on KingdomManagementVM.");
+                     return;
+                }
 
-                kingdomItemVMs.Add(warCouncilItem);
-                SubModule.Logger.Info("Successfully patched KingdomManagementVM to add War Council item.");
+                var warCouncilVm = new KingdomWarCouncilVM(onCategorySelect, __instance);
+                categories.Add(warCouncilVm);
+                SubModule.Logger.Info("[WarCouncil] Successfully added War Council tab to Kingdom screen.");
             }
             catch (Exception ex)
             {
-                SubModule.Logger.Error("KingdomManagementVMPatch: An exception occurred.", ex);
+                SubModule.Logger.Error("[WarCouncil] Failed to patch KingdomManagementVM.", ex);
             }
         }
     }
