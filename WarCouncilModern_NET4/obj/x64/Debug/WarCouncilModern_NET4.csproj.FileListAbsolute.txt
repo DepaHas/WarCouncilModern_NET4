@@ -1,5 +1,0 @@
-<<<<<<< Updated upstream
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\x64\Debug\WarCouncilModern_NET4.csproj.AssemblyReference.cache
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\x64\Debug\WarCouncilModern_NET4.csproj.CoreCompileInputs.cache
-=======
->>>>>>> Stashed changes
