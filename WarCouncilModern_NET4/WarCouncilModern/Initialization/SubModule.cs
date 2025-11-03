@@ -129,12 +129,11 @@ namespace WarCouncilModern.Initialization
                 UiInvoker = new UiInvoker(uiScheduler);
                 CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
 
-                CouncilOverviewViewModel = new CouncilOverviewViewModel();
+                CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
 
                 DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
-                CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
-
+                CampaignEvents.OnGameLoadedSignal.AddNonSerializedListener(this, OnGameLoaded);
             }
             catch (Exception ex)
             {
@@ -142,7 +141,7 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        private async void OnSessionLaunched(CampaignGameStarter starter)
+        private async void OnGameLoaded(CampaignGameStarter starter)
         {
             if (_settings == null) return;
             try
@@ -172,7 +171,7 @@ namespace WarCouncilModern.Initialization
                     _harmony = null;
                 }
 
-                CampaignEvents.OnSessionLaunchedEvent.RemoveNonSerializedListener(this, OnSessionLaunched);
+                CampaignEvents.OnGameLoadedSignal.RemoveNonSerializedListener(this, OnGameLoaded);
                 CouncilUiService?.Dispose();
                 CouncilUiService = null!;
             }

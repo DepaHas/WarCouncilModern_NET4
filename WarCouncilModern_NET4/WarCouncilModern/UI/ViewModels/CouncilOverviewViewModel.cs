@@ -1,81 +1,45 @@
 using System.Collections.ObjectModel;
 using TaleWorlds.Library;
-using WarCouncilModern.Initialization;
+using WarCouncilModern.UI.Services;
 using WarCouncilModern.UI.Commands;
+using WarCouncilModern.UI.ViewModels.Base;
+using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : ViewModel
+    public class CouncilOverviewViewModel : ViewModelBase
     {
-        private bool _isLoading;
-        private string _title = string.Empty;
-        private DecisionViewModel? _selectedDecision;
+        private readonly ICouncilUiService _uiService;
 
-        public ObservableCollection<DecisionViewModel> Decisions { get; } = new();
-
-        [DataSourceProperty]
-        public bool IsLoading
+        public CouncilOverviewViewModel(ICouncilUiService uiService)
         {
-            get => _isLoading;
-            set
-            {
-                if (_isLoading != value)
-                {
-                    _isLoading = value;
-                    OnPropertyChangedWithValue(value, nameof(IsLoading));
-                }
-            }
+            _uiService = uiService;
+            ProposeCommand = new DelegateCommand(async _ => await _uiService.ExecuteProposeNewDecision(), _ => _uiService.CanProposeNewDecision);
+        }
+
+        public override void RefreshValues()
+        {
+            base.RefreshValues();
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(Decisions));
         }
 
         [DataSourceProperty]
-        public string Title
-        {
-            get => _title;
-            set
-            {
-                if (_title != value)
-                {
-                    _title = value;
-                    OnPropertyChangedWithValue(value, nameof(Title));
-                }
-            }
-        }
+        public string Title => "War Council Overview";
 
         [DataSourceProperty]
-        public DecisionViewModel? SelectedDecision
-        {
-            get => _selectedDecision;
-            set
-            {
-                if (_selectedDecision != value)
-                {
-                    _selectedDecision = value;
-                    OnPropertyChangedWithValue(value, nameof(SelectedDecision));
-                }
-            }
-        }
+        public bool IsLoading => _uiService.IsLoading;
+
+        [DataSourceProperty]
+        public ObservableCollection<WarDecisionDto> Decisions => _uiService.Decisions;
 
         public DelegateCommand ProposeCommand { get; }
-        public DelegateCommand RefreshCommand { get; }
-        public DelegateCommand OpenDetailCommand { get; }
+        public DelegateCommand CloseCommand => new DelegateCommand(_ => OnClose());
 
-        public CouncilOverviewViewModel()
+        private void OnClose()
         {
-            Title = "War Council Overview";
-            ProposeCommand = new DelegateCommand(_ => OnPropose());
-            RefreshCommand = new DelegateCommand(_ => OnRefresh());
-            OpenDetailCommand = new DelegateCommand(OnOpenDetail);
-
-#if DEBUG
-            // Mock data for development
-            Decisions.Add(new DecisionViewModel { Title = "Declare War", Description = "Proposal to declare war on Western Empire." });
-            Decisions.Add(new DecisionViewModel { Title = "Trade Pact", Description = "Negotiate a trade pact with Battania." });
-            Decisions.Add(new DecisionViewModel { Title = "Raise Army", Description = "Summon the vassals for a campaign." });
-#endif
+            // Logic to close the screen
         }
-
-        private void OnPropose() => SubModule.Logger.Info("ProposeCommand triggered.");
-        private void OnRefresh() => SubModule.Logger.Info("RefreshCommand triggered.");
-        private void OnOpenDetail(object? obj) => SubModule.Logger.Info("OpenDetailCommand triggered.");
     }
 }
