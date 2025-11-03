@@ -1,17 +1,16 @@
-using TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement;
+﻿using TaleWorlds.CampaignSystem.ViewModelCollection.KingdomManagement;
 using TaleWorlds.Localization;
 
 namespace WarCouncilModern.UI.ViewModels.Kingdom
 {
     public class WarCouncilCategoryVM : KingdomCategoryVM
     {
-        public WarCouncilCategoryVM(TextObject title) : base(title, null, null, false)
-        {
-        }
+        public TextObject Title { get; }
 
-        protected override void OnSelect()
+        public WarCouncilCategoryVM()
+            : base()
         {
-            // TODO: Open the War Council screen.
+            Title = new TextObject("{=WC_TabName}War Council");
         }
     }
 }

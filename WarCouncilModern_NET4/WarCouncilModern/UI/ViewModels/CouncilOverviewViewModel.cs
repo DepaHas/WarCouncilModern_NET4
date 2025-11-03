@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using TaleWorlds.Core.ViewModelCollection;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
@@ -43,7 +43,7 @@ namespace WarCouncilModern.UI.ViewModels
         public void SelectCouncil(CouncilItemViewModel item)
         {
             SelectedCouncil = item;
-            Logger?.Info($"Council selected: {item?.Name}");
+          //  Logger?.Info($"Council selected: {item?.Name}");
         }
     }
 }

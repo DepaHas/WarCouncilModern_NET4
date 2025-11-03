@@ -1,66 +1,47 @@
-using System;
-using TaleWorlds.Core;
+﻿using TaleWorlds.Core;
+using TaleWorlds.Engine;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.ScreenSystem;
-using WarCouncilModern.Initialization;
-using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.States
 {
     public class WarCouncilState : GameState
     {
-        private GauntletLayer? _gauntletLayer;
+        private GauntletLayer? _layer;
         private GauntletMovieIdentifier? _movie;
-        private readonly CouncilOverviewViewModel _viewModel;
-
-        public override bool IsMenuState => true;
-
-        public WarCouncilState(CouncilOverviewViewModel viewModel)
-        {
-            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-        }
+        private ViewModel? _viewModel;
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _gauntletLayer = new GauntletLayer(100, "GauntletLayer");
-            _gauntletLayer.IsFocusLayer = true;
 
-            if (Game.Current?.ScreenManager != null)
-            {
-                Game.Current.ScreenManager.AddLayer(_gauntletLayer);
-                ScreenManager.TrySetFocus(_gauntletLayer);
-            }
+            _layer = new GauntletLayer(100);
+            ScreenManager.TopScreen.AddLayer(_layer);
 
-            try
-            {
-                _movie = _gauntletLayer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
-                SubModule.Logger.Info("WarCouncilState: Movie loaded successfully.");
-            }
-            catch (Exception ex)
-            {
-                SubModule.Logger.Error("WarCouncilState: Failed to load movie", ex);
-            }
+            // أنشئ ViewModel حقيقي يرث من TaleWorlds.Library.ViewModel
+            _viewModel = new WarCouncilModern.UI.ViewModels.CouncilOverviewViewModel();
+
+            _movie = _layer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
         }
 
         protected override void OnFinalize()
         {
-            base.OnFinalize();
-            if (_gauntletLayer != null)
+            if (_layer != null)
             {
                 if (_movie != null)
                 {
-                    _gauntletLayer.UnloadMovie(_movie);
+                    _layer.ReleaseMovie(_movie);
                     _movie = null;
                 }
 
-                if (Game.Current?.ScreenManager != null)
-                {
-                    Game.Current.ScreenManager.RemoveLayer(_gauntletLayer);
-                }
-                _gauntletLayer = null;
+                ScreenManager.TopScreen.RemoveLayer(_layer);
+                _layer = null;
             }
+
+            _viewModel = null;
+
+            base.OnFinalize();
         }
     }
 }

@@ -1,6 +1,7 @@
+﻿// File: WarCouncilModern/Initialization/SubModule.cs
+
 using System;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem;
@@ -104,7 +105,8 @@ namespace WarCouncilModern.Initialization
             CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
             DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
-            CampaignEvents.OnGameLoaded.AddAction(this, OnGameLoaded);
+            // ✅ الاشتراك الصحيح بالحدث
+            CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
         }
 
         protected override void OnSubModuleUnloaded()
@@ -113,7 +115,9 @@ namespace WarCouncilModern.Initialization
             {
                 Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
                 _harmony?.UnpatchAll("com.warcouncilmodern.patch");
-                CampaignEvents.OnGameLoaded.RemoveAction(this);
+
+                // ✅ الإلغاء الصحيح للاشتراك
+                CampaignEvents.OnGameLoadedEvent.RemoveNonSerializedListener(this, OnGameLoaded);
             }
             catch (Exception ex)
             {
@@ -125,9 +129,10 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        private void OnGameLoaded(Game game)
+        // ✅ التوقيع الصحيح للمعالج (بدون معاملات)
+        private void OnGameLoaded()
         {
-            // TODO: Implement game loaded logic.
+            // TODO: منطق التهيئة بعد تحميل اللعبة
         }
 
         private void RegisterSaveDefinerSafely()
