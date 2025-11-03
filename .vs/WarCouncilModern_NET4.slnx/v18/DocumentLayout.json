@@ -3,6 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\",
   "Documents": [
     {
+<<<<<<< Updated upstream
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\CouncilOverviewViewModel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\CouncilOverviewViewModel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -41,6 +42,14 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\ViewModelBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\ViewModelBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+=======
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\core\\council\\defaultcouncilmemberselector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\core\\council\\defaultcouncilmemberselector.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|c:\\users\\pc\\source\\repos\\warcouncilmodern_net4\\warcouncilmodern_net4\\warcouncilmodern\\councilsystem\\events\\councileventbus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F99A8626-34ED-4106-8823-4099C9086B69}|WarCouncilModern_NET4\\WarCouncilModern_NET4.csproj|solutionrelative:warcouncilmodern_net4\\warcouncilmodern\\councilsystem\\events\\councileventbus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+>>>>>>> Stashed changes
     }
   ],
   "DocumentGroupContainers": [
@@ -50,7 +59,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -62,6 +71,7 @@
             },
             {
               "$type": "Document",
+<<<<<<< Updated upstream
               "DocumentIndex": 2,
               "Title": "ICouncilUiService.cs",
               "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\UI\\Services\\ICouncilUiService.cs",
@@ -149,10 +159,22 @@
               "ViewState": "AgIAALEAAAAAAAAAAAArwMwAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-03T02:06:01.909Z",
+=======
+              "DocumentIndex": 0,
+              "Title": "DefaultCouncilMemberSelector.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Council\\DefaultCouncilMemberSelector.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Council\\DefaultCouncilMemberSelector.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\Core\\Council\\DefaultCouncilMemberSelector.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Core\\Council\\DefaultCouncilMemberSelector.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T02:28:23.083Z",
+>>>>>>> Stashed changes
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+<<<<<<< Updated upstream
               "DocumentIndex": 9,
               "Title": "ViewModelBase.cs",
               "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\ViewModelBase.cs",
@@ -188,6 +210,17 @@
               "ViewState": "AgIAAAcAAAAAAAAAAAAQwCkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-03T02:06:01.925Z",
+=======
+              "DocumentIndex": 1,
+              "Title": "CouncilEventBus.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\CouncilSystem\\Events\\CouncilEventBus.cs",
+              "RelativeDocumentMoniker": "WarCouncilModern_NET4\\WarCouncilModern\\CouncilSystem\\Events\\CouncilEventBus.cs",
+              "ToolTip": "C:\\Users\\PC\\source\\repos\\WarCouncilModern_NET4\\WarCouncilModern_NET4\\WarCouncilModern\\CouncilSystem\\Events\\CouncilEventBus.cs",
+              "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\CouncilSystem\\Events\\CouncilEventBus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T02:28:18.419Z",
+>>>>>>> Stashed changes
               "EditorCaption": ""
             }
           ]
