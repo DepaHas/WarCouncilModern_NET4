@@ -49,10 +49,10 @@ namespace WarCouncilModern.UI.ViewModels
             PopulateCouncils();
         }
 
-        public void SelectCouncil(CouncilItemViewModel council)
+        public void SelectCouncil(CouncilItemViewModel item)
         {
-            SelectedCouncil = council;
-            // Placeholder for navigation logic to the detail screen
+            SelectedCouncil = item;
+            Logger?.Info($"Council selected: {item?.Name}");
         }
 
         private void PopulateCouncils()
