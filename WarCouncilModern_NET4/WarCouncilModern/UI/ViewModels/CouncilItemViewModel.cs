@@ -2,7 +2,6 @@ using System;
 using System.Windows.Input;
 using WarCouncilModern.UI.Commands;
 using WarCouncilModern.UI.Dto;
-using TaleWorlds.Library;
 
 namespace WarCouncilModern.UI.ViewModels
 {

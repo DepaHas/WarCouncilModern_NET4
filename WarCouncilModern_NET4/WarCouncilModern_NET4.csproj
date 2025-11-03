@@ -188,7 +188,6 @@
     <Compile Include="WarCouncilModern\UI\Services\CouncilUiService.cs" />
     <Compile Include="WarCouncilModern\UI\Services\ICouncilUiService.cs" />
     <Compile Include="WarCouncilModern\UI\States\WarCouncilState.cs" />
-    <Compile Include="WarCouncilModern\UI\ViewModels\Base\ViewModelBase.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilItemViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionDetailViewModel.cs" />

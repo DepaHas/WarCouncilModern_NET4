@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -180,16 +180,5 @@ namespace WarCouncilModern.UI.Services
             CouncilEvents.OnDecisionProposed -= OnDecisionProposed_Background;
             CouncilEvents.OnDecisionProcessed -= OnDecisionProcessed_Background;
         }
-        public bool IsLoading => false; // سنغيرها لاحقاً
-
-        public ObservableCollection<WarDecisionDto> Decisions => new ObservableCollection<WarDecisionDto>(); // سنغيرها لاحقاً
-
-        public Task ExecuteProposeNewDecision()
-        {
-            // أضف منطق "اقتراح قرار جديد" هنا
-            return Task.CompletedTask;
-        }
-
-        public bool CanProposeNewDecision => true; // سنغيرها لاحقاً
     }
 }

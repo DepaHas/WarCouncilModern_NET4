@@ -49,13 +49,10 @@ namespace WarCouncilModern.UI.ViewModels
             PopulateCouncils();
         }
 
-        public void SelectCouncil(object? councilItem)
+        public void SelectCouncil(CouncilItemViewModel council)
         {
-            if (councilItem is CouncilItemViewModel council)
-            {
-                SelectedCouncil = council;
-                OnPropertyChanged(nameof(SelectedCouncil));
-            }
+            SelectedCouncil = council;
+            // Placeholder for navigation logic to the detail screen
         }
 
         private void PopulateCouncils()

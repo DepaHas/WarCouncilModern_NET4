@@ -1,7 +1,7 @@
 using System;
+using System.Reflection;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
-using TaleWorlds.GauntletUI.Data;
 using TaleWorlds.Library;
 using TaleWorlds.ScreenSystem;
 using WarCouncilModern.Initialization;
@@ -12,7 +12,7 @@ namespace WarCouncilModern.UI.States
     public class WarCouncilState : GameState
     {
         private GauntletLayer? _gauntletLayer;
-        private IGauntletMovie? _movie;
+        private object? _movie; // Use object? for API compatibility
         private readonly CouncilOverviewViewModel _viewModel;
 
         public override bool IsMenuState => true;
@@ -32,12 +32,20 @@ namespace WarCouncilModern.UI.States
 
             try
             {
-                _movie = _gauntletLayer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
-                SubModule.Logger.Info("WarCouncilState: Movie loaded successfully.");
+                var loadMovieMethod = typeof(GauntletLayer).GetMethod("LoadMovie", new[] { typeof(string), typeof(ViewModel) });
+                if (loadMovieMethod != null)
+                {
+                    _movie = loadMovieMethod.Invoke(_gauntletLayer, new object[] { "WarCouncil.CouncilOverview", _viewModel });
+                    SubModule.Logger.Info("WarCouncilState: Movie loaded successfully via reflection.");
+                }
+                else
+                {
+                    SubModule.Logger.Error("WarCouncilState: LoadMovie method not found via reflection.");
+                }
             }
             catch (Exception ex)
             {
-                SubModule.Logger.Error("WarCouncilState: Failed to load movie", ex);
+                SubModule.Logger.Error("WarCouncilState: Failed to load movie via reflection", ex);
             }
         }
 
@@ -48,7 +56,23 @@ namespace WarCouncilModern.UI.States
             {
                 if (_movie != null)
                 {
-                    _gauntletLayer.ReleaseMovie(_movie);
+                    try
+                    {
+                        var releaseMovieMethod = typeof(GauntletLayer).GetMethod("ReleaseMovie", new[] { _movie.GetType() });
+                        if (releaseMovieMethod != null)
+                        {
+                            releaseMovieMethod.Invoke(_gauntletLayer, new[] { _movie });
+                            SubModule.Logger.Info("WarCouncilState: Movie released successfully via reflection.");
+                        }
+                        else
+                        {
+                            SubModule.Logger.Error("WarCouncilState: ReleaseMovie method not found via reflection.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        SubModule.Logger.Error("WarCouncilState: Failed to release movie via reflection", ex);
+                    }
                     _movie = null;
                 }
                 ScreenManager.Instance.RemoveLayer(_gauntletLayer);

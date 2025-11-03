@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -29,7 +30,7 @@ namespace WarCouncilModern.Initialization
 {
     public class SubModule : MBSubModuleBase
     {
-        internal static IModLogger Logger { get; private set; } = GlobalLog.Instance;
+        internal static IModLogger Logger { get private set; } = GlobalLog.Instance;
         internal static IWarCouncilManager WarCouncilManager { get; private set; } = null!;
         internal static ICouncilService CouncilService { get; private set; } = null!;
         internal static IWarDecisionService WarDecisionService { get; private set; } = null!;
@@ -39,6 +40,7 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilProvider CouncilProvider { get; private set; } = null!;
         internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
+        private Harmony? _harmony;
 
         protected override void OnSubModuleLoad()
         {
@@ -46,8 +48,10 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
+                _harmony = new Harmony("com.warcouncilmodern.patch");
+                _harmony.PatchAll();
                 RegisterSaveDefinerSafely();
-                Logger.Info("SubModule loaded successfully.");
+                Logger.Info("SubModule loaded and Harmony patches applied successfully.");
             }
             catch (Exception ex)
             {
@@ -107,6 +111,7 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
+                _harmony?.UnpatchAll("com.warcouncilmodern.patch");
                 ReflectionHelpers.TryRemoveSessionHandler(CampaignEvents.OnSessionLaunchedEvent, this, "OnSessionLaunched");
                 CouncilUiService?.Dispose();
             }
@@ -131,8 +136,6 @@ namespace WarCouncilModern.Initialization
             try
             {
                 var definer = new WarCouncilSaveDefiner();
-
-                // Try SaveTypeRegistry.Instance.AddTypeDefiner(definer)
                 var registryType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeRegistry, TaleWorlds.SaveSystem");
                 if (registryType != null)
                 {
@@ -149,8 +152,6 @@ namespace WarCouncilModern.Initialization
                         }
                     }
                 }
-
-                // Fallback to static SaveTypeDefiner.AddTypeDefiner(definer)
                 var definerType = Type.GetType("TaleWorlds.SaveSystem.SaveTypeDefiner, TaleWorlds.SaveSystem");
                 var addStatic = definerType?.GetMethod("AddTypeDefiner", BindingFlags.Static | BindingFlags.Public);
                 if (addStatic != null)
@@ -159,9 +160,7 @@ namespace WarCouncilModern.Initialization
                     Logger.Info("WarCouncilSaveDefiner registered via SaveTypeDefiner.AddTypeDefiner fallback.");
                     return;
                 }
-
-                // If neither approach available, log a warning
-                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner for this TaleWorlds.SaveSystem version.");
+                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner.");
             }
             catch (Exception ex)
             {
