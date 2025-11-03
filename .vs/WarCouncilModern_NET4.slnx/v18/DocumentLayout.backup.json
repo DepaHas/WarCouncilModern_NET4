@@ -70,7 +70,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\Services\\ICouncilUiService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:43:29.69Z"
+              "WhenOpened": "2025-11-03T02:23:51.73Z"
             },
             {
               "$type": "Document",
@@ -82,7 +82,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\Services\\CouncilUiService.cs",
               "ViewState": "AgIAALEAAAAAAAAAAAAAANQAAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:39:54.226Z"
+              "WhenOpened": "2025-11-03T02:23:51.731Z"
             },
             {
               "$type": "Document",
@@ -94,7 +94,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\DecisionViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:37:48.617Z"
+              "WhenOpened": "2025-11-03T02:23:51.732Z"
             },
             {
               "$type": "Document",
@@ -106,7 +106,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\DecisionDetailViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:37:47.745Z"
+              "WhenOpened": "2025-11-03T02:23:51.733Z"
             },
             {
               "$type": "Document",
@@ -118,7 +118,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\CouncilItemViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:37:28.249Z"
+              "WhenOpened": "2025-11-03T02:23:51.733Z"
             },
             {
               "$type": "Document",
@@ -130,7 +130,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\Screens\\WarCouncilScreen.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAADgvx4AAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:32:53.187Z"
+              "WhenOpened": "2025-11-03T02:23:51.734Z"
             },
             {
               "$type": "Document",
@@ -142,7 +142,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\Initialization\\SubModule.cs",
               "ViewState": "AgIAALEAAAAAAAAAAAArwMwAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:32:25.4Z"
+              "WhenOpened": "2025-11-01T17:37:43.335Z"
             },
             {
               "$type": "Document",
@@ -154,7 +154,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\ViewModelBase.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:17:30.001Z"
+              "WhenOpened": "2025-11-03T02:23:51.736Z"
             },
             {
               "$type": "Document",
@@ -166,7 +166,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\DelegateCommand.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:16:50.152Z"
+              "WhenOpened": "2025-11-03T02:23:51.736Z"
             },
             {
               "$type": "Document",
@@ -178,7 +178,7 @@
               "RelativeToolTip": "WarCouncilModern_NET4\\WarCouncilModern\\UI\\ViewModels\\CouncilOverviewViewModel.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAQwC0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-03T00:12:58.075Z",
+              "WhenOpened": "2025-11-03T02:23:51.74Z",
               "EditorCaption": ""
             }
           ]
