@@ -2,12 +2,11 @@ using System.Collections.ObjectModel;
 using TaleWorlds.Library;
 using WarCouncilModern.UI.Services;
 using WarCouncilModern.UI.Commands;
-using WarCouncilModern.UI.ViewModels.Base;
 using WarCouncilModern.UI.Dto;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : ViewModelBase
+    public class CouncilOverviewViewModel : TaleWorlds.Library.ViewModel
     {
         private readonly ICouncilUiService _uiService;
 
@@ -41,5 +40,6 @@ namespace WarCouncilModern.UI.ViewModels
         {
             // Logic to close the screen
         }
+
     }
 }

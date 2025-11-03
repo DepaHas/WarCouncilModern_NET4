@@ -203,6 +203,7 @@
     <Compile Include="WarCouncilModern\UI\ViewModels\CouncilOverviewViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionDetailViewModel.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\DecisionViewModel.cs" />
+    <Compile Include="WarCouncilModern\UI\ViewModels\DelegateCommand.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\Kingdom\KingdomWarCouncilVM.cs" />
     <Compile Include="WarCouncilModern\UI\ViewModels\ViewModelBase.cs" />
     <Compile Include="WarCouncilModern\Utilities\FeatureRegistry.cs" />
