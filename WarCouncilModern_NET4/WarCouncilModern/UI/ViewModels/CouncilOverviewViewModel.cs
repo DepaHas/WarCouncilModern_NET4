@@ -30,8 +30,11 @@ namespace WarCouncilModern.UI.ViewModels
         [DataSourceProperty]
         public bool IsLoading => _uiService.IsLoading;
 
-        [DataSourceProperty]
-        public ObservableCollection<WarDecisionDto> Decisions => _uiService.Decisions;
+        public void SelectCouncil(CouncilItemViewModel item)
+        {
+            SelectedCouncil = item;
+            Logger?.Info($"Council selected: {item?.Name}");
+        }
 
         public DelegateCommand ProposeCommand { get; }
         public DelegateCommand CloseCommand => new DelegateCommand(_ => OnClose());

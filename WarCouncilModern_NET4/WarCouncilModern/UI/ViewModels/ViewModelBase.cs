@@ -1,14 +1,20 @@
-﻿using TaleWorlds.Library;
+﻿using System.Runtime.CompilerServices;
+using TaleWorlds.Library;
+using WarCouncilModern.Initialization;
+using WarCouncilModern.Utilities.Interfaces;
 
 namespace WarCouncilModern.UI.ViewModels
 {
     // الكلاس الأساسي لـ ViewModels يرث مباشرة من كلاس اللعبة
     public abstract class ViewModelBase : ViewModel
     {
-        // نحن الآن نرث كل شيء (OnPropertyChanged, SetField)
-        // من الكلاس 'ViewModel' الأساسي.
+        protected static readonly IModLogger Logger = SubModule.Logger;
 
-        // لسنا بحاجة لإضافة أي كود هنا في الوقت الحالي.
-        // الملف صحيح وهو فارغ هكذا.
+        // Use 'new' to hide the base method and avoid the override error.
+        new protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+        }
+
     }
 }
