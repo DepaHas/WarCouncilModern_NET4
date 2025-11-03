@@ -1,30 +1,29 @@
-using HarmonyLib;
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
+using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Council;
 using WarCouncilModern.Core.Decisions;
-using WarCouncilModern.Core.Init;
 using WarCouncilModern.Core.Manager;
 using WarCouncilModern.Core.Services;
 using WarCouncilModern.Core.Settings;
 using WarCouncilModern.Core.State;
-using WarCouncilModern.CouncilSystem.Behaviors;
 using WarCouncilModern.DevTools;
-using WarCouncilModern.Save;
 using WarCouncilModern.UI;
 using WarCouncilModern.UI.Platform;
 using WarCouncilModern.UI.Providers;
 using WarCouncilModern.UI.Services;
-using WarCouncilModern.UI.States;
 using WarCouncilModern.UI.ViewModels;
+using WarCouncilModern.UI.States;
 using WarCouncilModern.Utilities;
 using WarCouncilModern.Utilities.Interfaces;
+using WarCouncilModern.Save;
+using WarCouncilModern.CouncilSystem.Behaviors;
 
 namespace WarCouncilModern.Initialization
 {
@@ -40,7 +39,9 @@ namespace WarCouncilModern.Initialization
         internal static ICouncilProvider CouncilProvider { get; private set; } = null!;
         internal static ICouncilUiService CouncilUiService { get; private set; } = null!;
         internal static CouncilOverviewViewModel CouncilOverviewViewModel { get; private set; } = null!;
-        private IModSettings? _settings;
+
+        private Harmony? _harmony;
+        private WarCouncilCampaignBehavior? _warCouncilCampaignBehavior;
 
         protected override void OnSubModuleLoad()
         {
@@ -48,76 +49,62 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule loading - WarCouncilModern initializing.");
-
-                _harmony = new Harmony("com.warcouncilmodern.kingdomtab");
+                _harmony = new Harmony("com.warcouncilmodern.patch");
                 _harmony.PatchAll();
-                Logger.Info("Harmony patches applied (WarCouncilModern).");
-
-                var asm = AppDomain.CurrentDomain.GetAssemblies()
-                           .FirstOrDefault(a => a.GetName().Name?.IndexOf("Harmony", StringComparison.OrdinalIgnoreCase) >= 0);
-                Logger.Info(asm != null ? $"Harmony loaded from: {asm.Location}" : "Harmony not found among loaded assemblies.");
-
                 RegisterSaveDefinerSafely();
-
-                // Note: UI resources are loaded directly inside WarCouncilState (Gauntlet), do not Register here.
-                Logger.Info("SubModule loaded successfully.");
+                Logger.Info("SubModule loaded and Harmony patches applied successfully.");
             }
             catch (Exception ex)
             {
-                Logger.Error("Failed to apply Harmony patches.", ex);
+                try { Logger.Error("SubModule.OnSubModuleLoad exception", ex); } catch { }
             }
         }
 
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
         {
             base.OnGameStart(game, gameStarterObject);
+            if (!(game.GameType is Campaign)) return;
 
-            if (game.GameType is not Campaign)
-                return;
+            var gameStarter = (CampaignGameStarter)gameStarterObject;
+            _warCouncilCampaignBehavior = new WarCouncilCampaignBehavior();
+            gameStarter.AddBehavior(_warCouncilCampaignBehavior);
 
-            try
-            {
-                Logger.Info("Initializing WarCouncilModern SubModule...");
+            var settings = new StubModSettings();
+            var featureRegistry = new FeatureRegistry(settings);
+            var initializer = new ModuleInitializer();
+            initializer.Initialize(
+                _warCouncilCampaignBehavior,
+                featureRegistry,
+                Logger,
+                new ModStateTracker(Logger),
+                new CouncilMeetingService(Logger),
+                new DecisionProcessingService(Logger),
+                new AdvisorService(Logger),
+                settings
+            );
+            WarCouncilManager = initializer.Manager ?? throw new InvalidOperationException("ModuleInitializer failed to initialize WarCouncilManager.");
 
-                _settings = new StubModSettings();
-                var featureRegistry = new FeatureRegistry(_settings);
-                var initializer = new ModuleInitializer();
-                initializer.Initialize(
-                    _warCouncilCampaignBehavior,
-                    featureRegistry,
-                    Logger,
-                    new ModStateTracker(Logger),
-                    new CouncilMeetingService(Logger),
-                    new DecisionProcessingService(Logger),
-                    new AdvisorService(Logger),
-                    _settings
-                );
-                WarCouncilManager = initializer.Manager ?? throw new InvalidOperationException("ModuleInitializer failed to initialize WarCouncilManager.");
+            GameApi = new GameApi();
+            var memberSelector = new DefaultCouncilMemberSelector(GameApi, Logger);
+            var executionHandler = new ChangeFactionRelationHandler(GameApi, Logger);
 
-                GameApi = new GameApi();
-                var memberSelector = new DefaultCouncilMemberSelector(GameApi, Logger);
-                var executionHandler = new ChangeFactionRelationHandler(GameApi, Logger);
-
-                CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
-                WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
+            CouncilService = new CouncilService(WarCouncilManager, memberSelector, Logger);
+            WarDecisionService = new WarDecisionService(WarCouncilManager, featureRegistry, executionHandler, Logger);
 
 #if DEBUG
-                CouncilProvider = new MockCouncilProvider();
-                Logger.Info("Using MockCouncilProvider for UI development.");
+            CouncilProvider = new MockCouncilProvider();
+            Logger.Info("Using MockCouncilProvider for UI development.");
 #else
-                CouncilProvider = new LiveCouncilProvider(WarCouncilManager);
+            CouncilProvider = new LiveCouncilProvider(WarCouncilManager);
 #endif
 
-                var uiScheduler = SynchronizationContext.Current != null ? TaskScheduler.FromCurrentSynchronizationContext() : TaskScheduler.Default;
-                UiInvoker = new UiInvoker(uiScheduler);
-                CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            UiInvoker = new UiInvoker(uiScheduler);
+            CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
+            CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
+            DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
-                CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
-
-                DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
-
-                CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunchedHandler);
-            }
+            CampaignEvents.OnGameLoaded.AddAction(this, OnGameLoaded);
         }
 
         protected override void OnSubModuleUnloaded()
@@ -125,23 +112,12 @@ namespace WarCouncilModern.Initialization
             try
             {
                 Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
-                CampaignEvents.OnSessionLaunchedEvent.RemoveListeners(this);
-                CouncilUiService?.Dispose();
-                CouncilUiService = null;
-
-                CouncilOverviewViewModel = null;
-                DevPanel = null;
-                WarCouncilManager = null;
-                CouncilService = null;
-                WarDecisionService = null;
-                GameApi = null;
-                UiInvoker = null;
-                CouncilProvider = null;
-                _settings = null;
+                _harmony?.UnpatchAll("com.warcouncilmodern.patch");
+                CampaignEvents.OnGameLoaded.RemoveAction(this);
             }
             catch (Exception ex)
             {
-                Logger.Error("Error while removing Harmony patches", ex);
+                try { Logger.Error("SubModule.OnSubModuleUnloaded exception", ex); } catch { }
             }
             finally
             {
@@ -149,24 +125,9 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        private void OnSessionLaunchedHandler(CampaignGameStarter starter)
+        private void OnGameLoaded(Game game)
         {
-            try
-            {
-                if (_settings?.EnableCouncilUI == true)
-                {
-                    UiInvoker.Invoke(async () =>
-                    {
-                        await Task.Delay(800);
-                        await CouncilUiService.InitializeAsync();
-                        Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("OnSessionLaunchedHandler exception", ex);
-            }
+            // TODO: Implement game loaded logic.
         }
 
         private void RegisterSaveDefinerSafely()
@@ -198,7 +159,7 @@ namespace WarCouncilModern.Initialization
                     Logger.Info("WarCouncilSaveDefiner registered via SaveTypeDefiner.AddTypeDefiner fallback.");
                     return;
                 }
-                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner for this TaleWorlds.SaveSystem version.");
+                Logger.Warn("Could not find a supported API to register WarCouncilSaveDefiner.");
             }
             catch (Exception ex)
             {
