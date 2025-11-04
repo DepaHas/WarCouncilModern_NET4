@@ -1,5 +1,4 @@
 ﻿using TaleWorlds.Core;
-using TaleWorlds.Engine;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.ScreenSystem;
@@ -12,6 +11,11 @@ namespace WarCouncilModern.UI.States
         private GauntletMovieIdentifier? _movie;
         private ViewModel? _viewModel;
 
+        public WarCouncilState(ViewModel viewModel)
+        {
+            _viewModel = viewModel;
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -19,10 +23,8 @@ namespace WarCouncilModern.UI.States
             _layer = new GauntletLayer(100);
             ScreenManager.TopScreen.AddLayer(_layer);
 
-            // أنشئ ViewModel حقيقي يرث من TaleWorlds.Library.ViewModel
-            _viewModel = new WarCouncilModern.UI.ViewModels.CouncilOverviewViewModel();
-
-            _movie = _layer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
+            if (_viewModel != null)
+                _movie = _layer.LoadMovie("WarCouncil.CouncilOverview", _viewModel);
         }
 
         protected override void OnFinalize()
@@ -34,11 +36,9 @@ namespace WarCouncilModern.UI.States
                     _layer.ReleaseMovie(_movie);
                     _movie = null;
                 }
-
                 ScreenManager.TopScreen.RemoveLayer(_layer);
                 _layer = null;
             }
-
             _viewModel = null;
 
             base.OnFinalize();

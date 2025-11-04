@@ -1,0 +1,37 @@
+﻿<!-- File: UI/Screens/CouncilOverviewView.gauntlet.xml -->
+<GauntletMovie Name="CouncilOverviewView" Width="900" Height="640" IsModal="true">
+	<RootPanel>
+		<VerticalStackPanel Spacing="8" Padding="12">
+			<HorizontalStackPanel Height="56" VerticalAlignment="Top">
+				<Text Text="Councils" FontSize="22" />
+				<!-- TODO: استبدل placeholder_icon_council باسم sprite الرسمي -->
+				<Image Source="placeholder_icon_council" Width="40" Height="40" Margin="8,0,0,0" />
+			</HorizontalStackPanel>
+
+			<ListView ItemsSource="{DataSource.Councils}" Width="876" Height="520" ItemHeight="64">
+				<ListView.ItemTemplate>
+					<Border Padding="6" Margin="4">
+						<HorizontalStackPanel VerticalAlignment="Center" Spacing="12">
+							<Text Text="{Binding Name}" Width="300" FontSize="16" />
+							<Text Text="{Binding MemberCount}" Width="80" HorizontalAlignment="Center" />
+							<Text Text="{Binding ActiveDecisionsCount}" Width="100" HorizontalAlignment="Center" />
+							<Text Text="{Binding Status}" Width="120" HorizontalAlignment="Center" />
+							<Button Command="{Binding OpenDetailCommand}" Width="96" Height="30" HorizontalAlignment="Right">
+								<Text Text="Open" />
+							</Button>
+						</HorizontalStackPanel>
+					</Border>
+				</ListView.ItemTemplate>
+			</ListView>
+
+			<HorizontalStackPanel HorizontalAlignment="Right" Spacing="8">
+				<Button Command="{DataSource.ToggleMockCommand}" Width="120">
+					<Text Text="Toggle Mock" />
+				</Button>
+				<Button Command="{DataSource.CloseCommand}" Width="96">
+					<Text Text="Close" />
+				</Button>
+			</HorizontalStackPanel>
+		</VerticalStackPanel>
+	</RootPanel>
+</GauntletMovie>

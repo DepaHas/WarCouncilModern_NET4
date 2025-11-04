@@ -1,35 +1,20 @@
-using System;
-using System.Windows.Input;
-using TaleWorlds.Localization;
-using WarCouncilModern.UI.Commands;
-using WarCouncilModern.UI.Dto;
+using TaleWorlds.Library;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilItemViewModel : ViewModelBase
+    public class CouncilItemViewModel : ViewModel
     {
-        private readonly WarCouncilDto _dto;
-        private readonly CouncilOverviewViewModel _parent;
+        private string _name;
 
-        public Guid Id => _dto.SaveId;
-        public string Name { get; }
-        public int MemberCount => _dto.MemberCount;
-        public int ActiveDecisionsCount => _dto.Decisions.Count;
-        public string Status => _dto.Status;
-
-        public ICommand SelectCommand { get; }
-
-        public CouncilItemViewModel(WarCouncilDto dto, CouncilOverviewViewModel parent)
+        public string Name
         {
-            _dto = dto;
-            _parent = parent;
-            Name = new TextObject(_dto.Title).ToString();
-            SelectCommand = new DelegateCommand(ExecuteSelect);
+            get => _name;
+            set => SetField(ref _name, value, nameof(Name));
         }
 
-        private void ExecuteSelect(object? obj)
+        public CouncilItemViewModel(string name)
         {
-            _parent.SelectCouncil(this);
+            _name = name;
         }
     }
 }

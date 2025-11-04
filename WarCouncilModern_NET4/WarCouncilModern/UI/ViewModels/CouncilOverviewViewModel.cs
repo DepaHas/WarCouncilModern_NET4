@@ -1,49 +1,26 @@
-﻿using System.Collections.ObjectModel;
-using TaleWorlds.Core.ViewModelCollection;
-using TaleWorlds.Library;
-using TaleWorlds.Localization;
-using WarCouncilModern.UI.Commands;
+﻿using TaleWorlds.Library;
 using WarCouncilModern.UI.Services;
-using WarCouncilModern.UI.ViewModels;
 
 namespace WarCouncilModern.UI.ViewModels
 {
-    public class CouncilOverviewViewModel : ViewModelBase
+    public class CouncilOverviewViewModel : ViewModel
     {
-        private readonly ICouncilUiService _uiService;
-        private CouncilItemViewModel? _selectedCouncil;
+        public MBBindingList<CouncilItemViewModel> Decisions { get; }
+            = new MBBindingList<CouncilItemViewModel>();
 
-        [DataSourceProperty]
-        public string Title { get; }
-
-        [DataSourceProperty]
-        public ObservableCollection<CouncilItemViewModel> Decisions { get; set; }
-
-        [DataSourceProperty]
-        public CouncilItemViewModel? SelectedCouncil
+        public CouncilOverviewViewModel()
         {
-            get => _selectedCouncil;
-            set
-            {
-                if (value != _selectedCouncil)
-                {
-                    _selectedCouncil = value;
-                    OnPropertyChangedWithValue(value, nameof(SelectedCouncil));
-                }
-            }
+            Decisions.Add(new CouncilItemViewModel("Test Decision"));
         }
 
         public CouncilOverviewViewModel(ICouncilUiService uiService)
         {
-            _uiService = uiService;
-            Title = new TextObject("{=WC_OverviewTitle}War Council Overview").ToString();
-            Decisions = new ObservableCollection<CouncilItemViewModel>();
+            Decisions.Add(new CouncilItemViewModel("Decision via Service"));
         }
 
-        public void SelectCouncil(CouncilItemViewModel item)
+        public override void RefreshValues()
         {
-            SelectedCouncil = item;
-          //  Logger?.Info($"Council selected: {item?.Name}");
+            base.RefreshValues();
         }
     }
 }

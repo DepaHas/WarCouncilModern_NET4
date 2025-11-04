@@ -103,9 +103,11 @@ namespace WarCouncilModern.Initialization
             UiInvoker = new UiInvoker(uiScheduler);
             CouncilUiService = new CouncilUiService(CouncilProvider, WarCouncilManager, WarDecisionService, UiInvoker, Logger);
             CouncilOverviewViewModel = new CouncilOverviewViewModel(CouncilUiService);
+            Game.Current.GameStateManager.PushState(new WarCouncilState(CouncilOverviewViewModel));
+
             DevPanel = new DevCouncilPanel(CouncilService, CouncilUiService, Logger);
 
-            // ✅ الاشتراك الصحيح بالحدث
+            // ✅ الاشتراك الصحيح
             CampaignEvents.OnGameLoadedEvent.AddNonSerializedListener(this, OnGameLoaded);
         }
 
@@ -116,8 +118,8 @@ namespace WarCouncilModern.Initialization
                 Logger.Info("SubModule unloading - WarCouncilModern cleanup started.");
                 _harmony?.UnpatchAll("com.warcouncilmodern.patch");
 
-                // ✅ الإلغاء الصحيح للاشتراك
-                CampaignEvents.OnGameLoadedEvent.RemoveNonSerializedListener(this, OnGameLoaded);
+                // ✅ الإلغاء الصحيح في إصدارك
+                CampaignEvents.OnGameLoadedEvent.ClearListeners(this);
             }
             catch (Exception ex)
             {
@@ -129,8 +131,8 @@ namespace WarCouncilModern.Initialization
             }
         }
 
-        // ✅ التوقيع الصحيح للمعالج (بدون معاملات)
-        private void OnGameLoaded()
+        // ✅ التوقيع الصحيح
+        private void OnGameLoaded(CampaignGameStarter starter)
         {
             // TODO: منطق التهيئة بعد تحميل اللعبة
         }
@@ -169,6 +171,26 @@ namespace WarCouncilModern.Initialization
             catch (Exception ex)
             {
                 Logger.Error("Failed to construct/register WarCouncilSaveDefiner", ex);
+            }
+        }
+        public static void OpenWarCouncilScreen()
+        {
+            try
+            {
+                if (Game.Current?.GameStateManager != null)
+                {
+                    Game.Current.GameStateManager.PushState(
+                        new UI.States.WarCouncilState(
+                            new UI.ViewModels.CouncilOverviewViewModel(/* مرّر الخدمات الضرورية */)));
+                }
+                else
+                {
+                    Logger.Warn("Cannot open War Council screen: GameStateManager is null.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("OpenWarCouncilScreen exception", ex);
             }
         }
     }
