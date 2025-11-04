@@ -22,5 +22,10 @@ namespace WarCouncilModern.UI.ViewModels
         {
             base.RefreshValues();
         }
+        public void StartMeeting()
+        {
+            InformationManager.DisplayMessage(new InformationMessage("StartMeeting!"));
+        }
     }
+
 }
