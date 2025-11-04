@@ -1,6 +1,0 @@
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\bin\Debug\WarCouncilModern_NET4.dll
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\bin\Debug\WarCouncilModern_NET4.pdb
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\Debug\WarCouncilModern_NET4.csproj.AssemblyReference.cache
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\Debug\WarCouncilModern_NET4.csproj.CoreCompileInputs.cache
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\Debug\WarCouncilModern_NET4.dll
-C:\Users\PC\source\repos\WarCouncilModern_NET4\WarCouncilModern_NET4\obj\Debug\WarCouncilModern_NET4.pdb
